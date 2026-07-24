@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { screeningDecisions } from "../db/schema";
+import { db } from "../db/index.js";
+import { screeningDecisions } from "../db/schema.js";
 
 export async function getScreeningDecision(stageId: string) {
   const result = await db

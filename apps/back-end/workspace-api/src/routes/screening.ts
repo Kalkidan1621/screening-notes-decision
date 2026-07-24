@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 
-import { screeningDecisionSchema } from "../schemas/screening";
+import { screeningDecisionSchema } from "../schemas/screening.js";
 import {
   getScreeningDecision,
   saveScreeningDecision,
-} from "../services/screening";
+} from "../services/screening.js";
 
 const screening = new Hono();
 

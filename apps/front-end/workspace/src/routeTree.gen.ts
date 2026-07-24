@@ -9,55 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ScreeningStageIdRouteImport } from './routes/screening.$stageId'
 
-const ScreeningRoute = ScreeningRouteImport.update({
-  id: '/screening',
-  path: '/screening',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScreeningStageIdRoute = ScreeningStageIdRouteImport.update({
+  id: '/screening/$stageId',
+  path: '/screening/$stageId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/screening': typeof ScreeningRoute
+  '/screening/$stageId': typeof ScreeningStageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/screening': typeof ScreeningRoute
+  '/screening/$stageId': typeof ScreeningStageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/screening': typeof ScreeningRoute
+  '/screening/$stageId': typeof ScreeningStageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/screening'
+  fullPaths: '/' | '/screening/$stageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/screening'
-  id: '__root__' | '/' | '/screening'
+  to: '/' | '/screening/$stageId'
+  id: '__root__' | '/' | '/screening/$stageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ScreeningRoute: typeof ScreeningRoute
+  ScreeningStageIdRoute: typeof ScreeningStageIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/screening': {
-      id: '/screening'
-      path: '/screening'
-      fullPath: '/screening'
-      preLoaderRoute: typeof ScreeningRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/screening/$stageId': {
+      id: '/screening/$stageId'
+      path: '/screening/$stageId'
+      fullPath: '/screening/$stageId'
+      preLoaderRoute: typeof ScreeningStageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ScreeningRoute: ScreeningRoute,
+  ScreeningStageIdRoute: ScreeningStageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
