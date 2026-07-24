@@ -2,7 +2,7 @@ import type { ScreeningDecisionResponse } from "../types/screening";
 
 const API_URL = "http://localhost:3000";
 
-export async function getScreeningDecision(stageId: string) {
+export async function getScreeningDecision(stageId: string):Promise<ScreeningDecisionResponse> {
   const response = await fetch(
     `${API_URL}/hiring/application/screening/${stageId}/decision`
   );

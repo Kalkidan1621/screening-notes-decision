@@ -14,7 +14,7 @@ screening.get(
   async (c) => {
     const stageId = c.req.param("stageId");
 
-    const decision = await getScreeningDecision(stageId);
+    const decision = await getScreeningDecision(stageId);//db data
 
     return c.json({
       data: decision,
@@ -27,7 +27,7 @@ screening.get(
 screening.post(
   "/hiring/application/screening/:stageId/decision",
   async (c) => {
-    const stageId = c.req.param("stageId");
+    const stageId = c.req.param("stageId");//url wust yalewun stageid found
 
     const body = await c.req.json();
 

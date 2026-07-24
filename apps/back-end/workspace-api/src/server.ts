@@ -1,8 +1,8 @@
-import "dotenv/config";
+import "dotenv/config";//f w y e v e
 import { cors } from "hono/cors";
-import { serve } from "@hono/node-server";
+import { serve } from "@hono/node-server";//node js
 import { Hono } from "hono";
-import screening from "./routes/screening";
+import screening from "./routes/screening";//get and post api route use file
 
 const app = new Hono();
 app.use(
