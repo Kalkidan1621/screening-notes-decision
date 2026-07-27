@@ -51,7 +51,8 @@ apps/
             │   └── screening.ts
             └── server.ts
             
-    Technologies
+
+#Technologies
 Frontend
   React
   TypeScript
@@ -65,6 +66,7 @@ Backend
   Zod
 Package Manager
   pnpm
+
 
 How It Works
 
