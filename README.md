@@ -305,7 +305,7 @@ The note:
 * Must not be empty
 * Must contain meaningful text
 * Must not contain numbers only
-* Must be at least 10 characters
+* Must be at least 7 characters
 * Must not exceed 1000 characters
 
 Example of an invalid note:
@@ -521,8 +521,4 @@ is ignored to prevent ZIP files from being accidentally committed.
 
 Sensitive files such as `.env` should also not be committed.
 
----
 
-## License
-
-This project is for educational and development purposes.
