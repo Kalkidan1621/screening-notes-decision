@@ -24,7 +24,7 @@ function ScreeningPage() {
   const [note, setNote] = useState("");
 
   const [decisionValue, setDecisionValue] =
-    useState<ScreeningDecision>("pass");
+    useState<ScreeningDecision | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -58,15 +58,20 @@ function ScreeningPage() {
   }, [stageId]);
 
   async function handleSave() {
+
     const trimmedNote = note.trim();
 
+     if (!decisionValue) {
+    alert("Please select a screening decision.");
+    return;
+  }
     if (!trimmedNote) {
       alert("Please enter a screening note.");
       return;
     }
 
     if (trimmedNote.length < 7) {
-  alert("Screening note must be at least 10 characters.");
+  alert("Screening note must be at least 7 characters.");
   return;
 }
 
@@ -99,7 +104,7 @@ if (/^\d+$/.test(trimmedNote)) {
         error instanceof Error
           ? error.message
           : "Failed to save screening decision",
-      );
+        );
     } finally {
       setSaving(false);
     }

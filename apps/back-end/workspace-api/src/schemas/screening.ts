@@ -5,6 +5,7 @@ export const screeningDecisionSchema = z.object({
     "pass",
     "hold",
     "reject",
+    
   ]),
 
   note: z
