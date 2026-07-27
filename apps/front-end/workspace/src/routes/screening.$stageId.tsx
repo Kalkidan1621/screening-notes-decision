@@ -58,7 +58,6 @@ function ScreeningPage() {
   }, [stageId]);
 
   async function handleSave() {
-
     const trimmedNote = note.trim();
 
      if (!decisionValue) {
