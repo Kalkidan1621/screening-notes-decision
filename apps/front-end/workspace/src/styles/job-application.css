@@ -1,0 +1,60 @@
+.job-application-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px 20px;
+}
+
+
+.job-application-container {
+  max-width: 600px;
+  margin: auto;
+}
+
+
+.job-application-card {
+  background: white;
+  padding: 35px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+
+.job-application-card h1 {
+  margin-bottom: 10px;
+}
+
+
+.job-application-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.job-application-card input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+
+.job-application-card button {
+  margin-top: 15px;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+
+.job-application-card button:hover {
+  background: #1d4ed8;
+}
+
+
+.application-message {
+  margin-top: 20px;
+  font-weight: 600;
+}

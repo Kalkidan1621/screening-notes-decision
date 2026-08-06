@@ -1,0 +1,182 @@
+.job-details-page {
+  min-height: 100vh;
+  padding: 60px 24px;
+  background: #f6f7fb;
+}
+
+.job-details-container {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+/* Hero */
+.job-details-header {
+  padding: 40px;
+  border-radius: 24px 24px 0 0;
+  color: white;
+  background: linear-gradient(
+    135deg,
+    #334155,
+    #56639b
+  );
+}
+
+.job-details-header .department {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+.job-details-header h1 {
+  margin: 0;
+  font-size: clamp(32px,4vw,48px);
+}
+
+.job-tags {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.job-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  font-size: 14px;
+}
+
+
+/* Main card */
+
+.job-details-card {
+  background:white;
+  padding:40px;
+  border-radius:0 0 24px 24px;
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.08);
+}
+
+
+/* Sections */
+
+.job-section {
+  margin-bottom:40px;
+}
+
+.job-section h2 {
+  margin-bottom:18px;
+  color:#273247;
+  font-size:24px;
+}
+
+
+/* Description */
+
+.job-description {
+  color:#596276;
+  line-height:1.8;
+}
+
+
+/* Information cards */
+
+.job-info-grid {
+  display:grid;
+  grid-template-columns:
+  repeat(2,1fr);
+  gap:18px;
+}
+
+
+.job-info-card {
+  padding:20px;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  background:#fafafa;
+}
+
+
+.job-info-card span {
+  display:block;
+  color:#6b7280;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+
+.job-info-card strong {
+  color:#273247;
+  font-size:17px;
+}
+
+
+/* More info */
+
+.job-more-info {
+  display:grid;
+  grid-template-columns:
+  repeat(2,1fr);
+  gap:15px;
+}
+
+.job-more-info div {
+  padding:14px;
+  background:#f8fafc;
+  border-radius:10px;
+}
+
+
+/* Apply button */
+
+.apply-now-button {
+  display:block;
+  width:100%;
+  margin-top:30px;
+  padding:16px;
+  border-radius:12px;
+  border:none;
+
+  color:white;
+  background:
+  linear-gradient(
+    135deg,
+    #465486,
+    #6675b8
+  );
+
+  font-size:17px;
+  font-weight:700;
+  cursor:pointer;
+
+  transition:.2s;
+}
+
+
+.apply-now-button:hover {
+  transform:translateY(-2px);
+  box-shadow:
+  0 12px 25px rgba(70,84,134,.3);
+}
+
+
+/* Mobile */
+
+@media(max-width:700px){
+
+.job-details-page{
+ padding:30px 16px;
+}
+
+.job-details-header,
+.job-details-card{
+ padding:24px;
+}
+
+
+.job-info-grid,
+.job-more-info{
+ grid-template-columns:1fr;
+}
+
+}

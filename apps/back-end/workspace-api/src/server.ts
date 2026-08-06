@@ -3,6 +3,8 @@ import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";//node js
 import { Hono } from "hono";
 import screening from "./routes/screening.js";//get and post api route use file
+import jobsRouter from "./routes/jobs.js";
+import applicationsRouter from "./routes/applications.js";
 
 const app = new Hono();
 app.use(
@@ -13,6 +15,8 @@ app.use(
 );
 
 app.route("/", screening);
+app.route("/jobs", jobsRouter);
+app.route("/applications", applicationsRouter);
 
 serve({
   fetch: app.fetch,

@@ -8,6 +8,27 @@
       "when": 1783925469528,
       "tag": "0000_hesitant_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785595902706,
+      "tag": "0001_panoramic_naoko",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785702467944,
+      "tag": "0002_marvelous_white_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785855706842,
+      "tag": "0003_green_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

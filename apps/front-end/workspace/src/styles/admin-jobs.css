@@ -1,0 +1,317 @@
+.admin-jobs-page {
+  min-height: 100vh;
+  padding: 52px 24px 80px;
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(79, 70, 229, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      #f7f8fc 0%,
+      #eef1f8 100%
+    );
+  color: #202635;
+}
+
+.admin-jobs-container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.admin-job-form-card {
+  padding: 45px;
+  border: 1px solid #dfe3ec;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 15px 40px rgba(15,23,42,0.08);
+}
+
+
+.admin-job-header {
+  margin-bottom: 28px;
+}
+
+.admin-job-eyebrow {
+  display: none;
+}
+
+.admin-job-header h1 {
+  margin: 0;
+  color: #242a38;
+  font-size: 2rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.admin-job-header p:last-child {
+  display: none;
+}
+
+/*
+  Two-column form layout
+
+  Left:
+  Job Title
+  Department
+  Description
+  Location
+
+  Right:
+  Employment Type
+  Priority
+  Create Job button
+*/
+
+.admin-job-form-card form {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.7fr)
+    minmax(260px, 0.75fr);
+  column-gap: 28px;
+  align-items: start;
+}
+
+/* Left column */
+
+.admin-job-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.admin-job-field:nth-of-type(1),
+.admin-job-field:nth-of-type(2),
+.admin-job-field:nth-of-type(3),
+.admin-job-field:nth-of-type(4) {
+  grid-column: 1;
+}
+
+/* Right column */
+
+.admin-job-field:nth-of-type(5),
+.admin-job-field:nth-of-type(6) {
+  grid-column: 2;
+}
+
+/* Labels */
+
+.admin-job-field label {
+  margin-bottom: 7px;
+  color: #3c4353;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+/* Inputs */
+
+.admin-job-field input,
+.admin-job-field textarea,
+.admin-job-field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d5dae5;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  color: #29303f;
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-job-field input,
+.admin-job-field select {
+  min-height: 46px;
+  padding: 11px 13px;
+}
+
+.admin-job-field textarea {
+  min-height: 170px;
+  padding: 13px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.admin-job-field input::placeholder,
+.admin-job-field textarea::placeholder {
+  color: #9aa1af;
+}
+
+/* Select appearance */
+
+.admin-job-field select {
+  cursor: pointer;
+}
+
+/* Focus */
+
+.admin-job-field input:focus,
+.admin-job-field textarea:focus,
+.admin-job-field select:focus {
+  border-color: #5a61a8;
+  box-shadow:
+    0 0 0 3px
+    rgba(90, 97, 168, 0.13);
+}
+
+/* Validation */
+
+.admin-job-field
+  input[aria-invalid="true"],
+.admin-job-field
+  textarea[aria-invalid="true"] {
+  border-color: #d45a58;
+}
+
+.admin-field-error {
+  margin: 6px 0 0;
+  color: #c74442;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Success and error messages */
+
+.admin-job-success,
+.admin-job-error {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  padding: 13px 15px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.admin-job-success {
+  border: 1px solid #a9ddbd;
+  background: #effaf3;
+  color: #267144;
+}
+
+.admin-job-error {
+  border: 1px solid #efb8b6;
+  background: #fff4f3;
+  color: #b9403e;
+}
+
+/* Publish button */
+
+.create-job-button {
+  grid-column: 2;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      #4b5295,
+      #646cb5
+    );
+  color: #ffffff;
+  box-shadow:
+    0 8px 20px
+    rgba(70, 78, 145, 0.22);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.create-job-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 25px
+    rgba(70, 78, 145, 0.3);
+}
+
+.create-job-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.create-job-button:focus-visible {
+  outline:
+    3px solid
+    rgba(90, 97, 168, 0.28);
+  outline-offset: 3px;
+}
+
+.create-job-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Tablet */
+
+@media (max-width: 850px) {
+  .admin-jobs-page {
+    padding: 36px 18px 65px;
+  }
+
+  .admin-job-form-card {
+    padding: 26px;
+  }
+
+  .admin-job-form-card form {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(220px, 0.7fr);
+    column-gap: 20px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 680px) {
+  .admin-jobs-page {
+    padding: 25px 12px 55px;
+  }
+
+  .admin-job-form-card {
+    padding: 20px 16px;
+    border-radius: 13px;
+  }
+
+  .admin-job-header {
+    margin-bottom: 22px;
+  }
+
+  .admin-job-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .admin-job-form-card form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-job-field {
+    width: 100%;
+    margin-bottom: 17px;
+  }
+
+  .admin-job-field textarea {
+    min-height: 145px;
+  }
+
+  .admin-job-success,
+  .admin-job-error {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .create-job-button {
+    width: 100%;
+    margin-top: 5px;
+  }
+}
