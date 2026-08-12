@@ -163,6 +163,10 @@ export const applications = pgTable(
       },
     ).notNull(),
 
+    resumePath: varchar("resume_path", {
+  length: 500,
+}),
+
     status: varchar("status", {
       length: 20,
     })

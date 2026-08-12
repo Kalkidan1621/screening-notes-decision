@@ -33,7 +33,7 @@ applicationsRouter.get(
 applicationsRouter.post(
   "/",
   async (c) => {
-    const body = await c.req.json();
+    const body = await c.req.parseBody();
 
     const result =
       createApplicationSchema.safeParse(body);
