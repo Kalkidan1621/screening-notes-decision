@@ -17,7 +17,6 @@ export const Route = createFileRoute(
   component: CreateJobPage,
 });
 
-
 type EmploymentType =
   | "full-time"
   | "part-time"
@@ -28,7 +27,6 @@ type Priority =
   | "low"
   | "medium"
   | "high";
-
 
 function CreateJobPage() {
   const [title, setTitle] =
@@ -95,8 +93,6 @@ function CreateJobPage() {
   ] = useState<Priority>(
     "medium",
   );
-
-
   // Validation errors
 
   const [
@@ -153,8 +149,6 @@ function CreateJobPage() {
     salaryError,
     setSalaryError,
   ] = useState("");
-
-
   // Submit states
 
   const [
@@ -193,7 +187,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateEmployer(
     value: string,
   ) {
@@ -213,7 +206,6 @@ function CreateJobPage() {
       setEmployerError("");
     }
   }
-
 
   function validateDepartment(
     value: string,
@@ -235,7 +227,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateDescription(
     value: string,
   ) {
@@ -255,7 +246,6 @@ function CreateJobPage() {
       setDescriptionError("");
     }
   }
-
 
   function validateLocation(
     value: string,
@@ -277,7 +267,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateExperience(
     value: string,
   ) {
@@ -290,7 +279,6 @@ function CreateJobPage() {
       setExperienceError("");
     }
   }
-
 
   function validateEducationalQualification(
     value: string,
@@ -312,7 +300,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateWorkingTime(
     value: string,
   ) {
@@ -333,7 +320,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateOpeningDate(
     value: string,
   ) {
@@ -346,7 +332,6 @@ function CreateJobPage() {
       setOpeningDateError("");
     }
   }
-
 
   function validateClosingDate(
     value: string,
@@ -361,7 +346,6 @@ function CreateJobPage() {
     }
   }
 
-
   function validateSalary(
     value: string,
   ) {
@@ -375,7 +359,6 @@ function CreateJobPage() {
     }
   }
 
-
   async function handleSubmit(
     event:
       FormEvent<HTMLFormElement>,
@@ -385,9 +368,7 @@ function CreateJobPage() {
     setSuccess("");
     setSubmitError("");
 
-
     let hasError = false;
-
 
     if (
       title.trim().length < 3
@@ -399,7 +380,6 @@ function CreateJobPage() {
       hasError = true;
     }
 
-
     if (
       employer.trim().length < 2
     ) {
@@ -409,7 +389,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
 
     if (
       department.trim().length < 2
@@ -421,7 +400,6 @@ function CreateJobPage() {
       hasError = true;
     }
 
-
     if (
       description.trim().length < 20
     ) {
@@ -431,7 +409,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
 
     if (
       location.trim().length < 2
@@ -443,7 +420,6 @@ function CreateJobPage() {
       hasError = true;
     }
 
-
     if (
       experience.trim().length === 0
     ) {
@@ -453,7 +429,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
 
     if (
       educationalQualification
@@ -467,7 +442,6 @@ function CreateJobPage() {
       hasError = true;
     }
 
-
     if (
       workingTime.trim().length < 2
     ) {
@@ -477,7 +451,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
 
     if (
       openingDate.length === 0
@@ -489,7 +462,6 @@ function CreateJobPage() {
       hasError = true;
     }
 
-
     if (
       closingDate.length === 0
     ) {
@@ -499,8 +471,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
-
     if (
       openingDate &&
       closingDate &&
@@ -512,8 +482,6 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
-
     if (
       salary.trim().length === 0
     ) {
@@ -523,13 +491,9 @@ function CreateJobPage() {
 
       hasError = true;
     }
-
-
     if (hasError) {
       return;
     }
-
-
     try {
       setIsSubmitting(true);
 
@@ -572,13 +536,9 @@ function CreateJobPage() {
         status:
           "active",
       });
-
-
       setSuccess(
         "Job created successfully!",
       );
-
-
       // Clear the form
 
       setTitle("");
@@ -611,7 +571,6 @@ function CreateJobPage() {
         "medium",
       );
 
-
     } catch (error) {
       console.error(
         "Failed to create job:",
@@ -628,7 +587,6 @@ function CreateJobPage() {
       setIsSubmitting(false);
     }
   }
-
 
   return (
     <main className="admin-jobs-page">
@@ -653,7 +611,6 @@ function CreateJobPage() {
             </p>
 
           </header>
-
 
           <form
             onSubmit={handleSubmit}
@@ -697,7 +654,6 @@ function CreateJobPage() {
 
             </div>
 
-
             <div className="admin-job-field">
 
               <label htmlFor="employer">
@@ -734,7 +690,6 @@ function CreateJobPage() {
               )}
 
             </div>
-
 
             <div className="admin-job-field">
 
@@ -813,7 +768,6 @@ function CreateJobPage() {
 
             </div>
 
-
             <div className="admin-job-field">
 
               <label htmlFor="experience">
@@ -885,7 +839,6 @@ function CreateJobPage() {
                   )
                 }
               />
-
               {educationalQualificationError && (
                 <p
                   className="admin-field-error"
@@ -898,7 +851,6 @@ function CreateJobPage() {
               )}
 
             </div>
-
 
             <div className="admin-job-field">
 
@@ -916,7 +868,6 @@ function CreateJobPage() {
                   )
                 }
               >
-
                 <option value="full-time">
                   Full Time
                 </option>
@@ -936,8 +887,6 @@ function CreateJobPage() {
               </select>
 
             </div>
-
-
             <div className="admin-job-field">
 
               <label htmlFor="workingTime">
@@ -976,7 +925,6 @@ function CreateJobPage() {
               )}
 
             </div>
-
 
             <div className="admin-job-field">
 
@@ -1196,7 +1144,6 @@ function CreateJobPage() {
               </p>
 
             )}
-
 
             <button
               type="submit"

@@ -1,3 +1,7 @@
+/* =========================================================
+   ADMIN SCREENING PAGE
+========================================================= */
+
 .admin-screening-page {
   min-height: 100vh;
   padding: 48px 24px;
@@ -15,15 +19,112 @@
   margin: 0 auto;
 }
 
-/* Header */
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .admin-screening-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
+  gap: 30px;
+  margin-bottom: 30px;
 }
+
+.admin-screening-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* Right-side New Job + Refresh */
+
+.admin-header-actions {
+  display: flex;
+  width: 135px;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+/* =========================================================
+   NEW JOB BUTTON
+========================================================= */
+
+.admin-new-job-button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid #4b5295;
+  border-radius: 8px;
+  background: #4b5295;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow:
+    0 6px 16px
+    rgba(70, 78, 145, 0.2);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-new-job-button:hover {
+  transform: translateY(-1px);
+  background: #3f467f;
+  box-shadow:
+    0 8px 20px
+    rgba(70, 78, 145, 0.25);
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
+
+.admin-refresh-button {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 18px;
+  background: #ffffff;
+  color: #40598c;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-refresh-button:hover {
+  background: #f5f7fb;
+  border-color: #40598c;
+  transform: translateY(-1px);
+}
+
+.admin-refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* =========================================================
+   EYEBROW
+========================================================= */
 
 .admin-eyebrow {
   margin: 0 0 8px;
@@ -33,6 +134,11 @@
   letter-spacing: 2px;
 }
 
+
+/* =========================================================
+   HEADER TEXT
+========================================================= */
+
 .admin-screening-header h1 {
   margin: 0;
   color: #1f2a44;
@@ -41,6 +147,7 @@
     5vw,
     48px
   );
+  line-height: 1.15;
 }
 
 .admin-screening-header p:not(
@@ -52,26 +159,10 @@
   line-height: 1.7;
 }
 
-.admin-refresh-button {
-  border: none;
-  border-radius: 10px;
-  padding: 12px 22px;
-  background: #40598c;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    background 0.2s;
-}
 
-.admin-refresh-button:hover {
-  background: #314875;
-  transform: translateY(-2px);
-}
-
-/* Statistics */
+/* =========================================================
+   STATISTICS
+========================================================= */
 
 .admin-stats-grid {
   display: grid;
@@ -91,9 +182,7 @@
   background: #ffffff;
   box-shadow:
     0 8px 25px
-    rgb(
-      31 42 68 / 8%
-    );
+    rgb(31 42 68 / 8%);
 }
 
 .admin-stat-card span {
@@ -107,9 +196,13 @@
 .admin-stat-card strong {
   color: #243452;
   font-size: 32px;
+  line-height: 1;
 }
 
-/* Search and Filter */
+
+/* =========================================================
+   SEARCH + FILTER
+========================================================= */
 
 .admin-filters {
   display: flex;
@@ -122,14 +215,13 @@
   background: #ffffff;
   box-shadow:
     0 8px 25px
-    rgb(
-      31 42 68 / 6%
-    );
+    rgb(31 42 68 / 6%);
 }
 
 .admin-search-box {
   position: relative;
   flex: 1;
+  min-width: 0;
 }
 
 .admin-search-box input {
@@ -148,17 +240,19 @@
   background: #f8fafc;
   font-size: 15px;
   transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .admin-search-box input:focus {
   border-color: #52699b;
   box-shadow:
     0 0 0 4px
-    rgb(
-      82 105 155 / 15%
-    );
+    rgb(82 105 155 / 15%);
+}
+
+.admin-search-box input::placeholder {
+  color: #94a3b8;
 }
 
 .admin-clear-search {
@@ -173,8 +267,11 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transform:
-    translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.admin-clear-search:hover {
+  background: #dce4f2;
 }
 
 .admin-filters select {
@@ -197,10 +294,13 @@
   border-color: #52699b;
   box-shadow:
     0 0 0 4px
-    rgb(
-      82 105 155 / 15%
-    );
+    rgb(82 105 155 / 15%);
 }
+
+
+/* =========================================================
+   RESULTS COUNT
+========================================================= */
 
 .admin-results-count {
   margin:
@@ -215,7 +315,10 @@
   color: #314875;
 }
 
-/* Table */
+
+/* =========================================================
+   TABLE
+========================================================= */
 
 .admin-table-wrapper {
   overflow-x: auto;
@@ -224,9 +327,7 @@
   background: #ffffff;
   box-shadow:
     0 10px 30px
-    rgb(
-      31 42 68 / 8%
-    );
+    rgb(31 42 68 / 8%);
 }
 
 .admin-table {
@@ -259,7 +360,7 @@
 
 .admin-table tbody tr {
   transition:
-    background 0.2s;
+    background 0.2s ease;
 }
 
 .admin-table tbody tr:hover {
@@ -274,6 +375,11 @@
   color: #243452;
   font-size: 15px;
 }
+
+
+/* =========================================================
+   CONTACT
+========================================================= */
 
 .admin-contact {
   display: flex;
@@ -290,6 +396,7 @@
   color: #7b8799;
   font-size: 13px;
 }
+/* RESUME */
 
 .resume-name {
   display: inline-block;
@@ -301,13 +408,28 @@
   white-space: nowrap;
 }
 
-/* Status */
+/* CANDIDATE LINK */
+
+.candidate-link {
+  color: #243452;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.candidate-link:hover {
+  color: #40598c;
+  text-decoration: underline;
+}
+
+
+/* STATUS */
 
 .status-badge {
   display: inline-flex;
+  min-width: 78px;
   align-items: center;
   justify-content: center;
-  min-width: 78px;
   padding:
     7px
     11px;
@@ -331,7 +453,7 @@
   background: #fde3e3;
 }
 
-/* Actions */
+/* ACTION BUTTONS */
 
 .admin-actions {
   display: flex;
@@ -350,8 +472,8 @@
   font-weight: 700;
   cursor: pointer;
   transition:
-    transform 0.2s,
-    opacity 0.2s;
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .approve-button {
@@ -362,10 +484,9 @@
   background: #bd3f3f;
 }
 
-.approve-button:hover,
-.reject-button:hover {
-  transform:
-    translateY(-1px);
+.approve-button:hover:not(:disabled),
+.reject-button:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .approve-button:disabled,
@@ -375,12 +496,13 @@
   transform: none;
 }
 
-/* Messages */
-
+/* ERROR MESSAGES */
 .admin-error-message,
 .admin-action-error {
   margin-bottom: 18px;
-  padding: 14px 16px;
+  padding:
+    14px
+    16px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
@@ -400,7 +522,7 @@
   background: #fff6ed;
 }
 
-/* Empty State */
+/* EMPTY STATE */
 
 .admin-empty-state {
   padding:
@@ -412,9 +534,7 @@
   text-align: center;
   box-shadow:
     0 10px 30px
-    rgb(
-      31 42 68 / 7%
-    );
+    rgb(31 42 68 / 7%);
 }
 
 .admin-empty-state h2 {
@@ -443,7 +563,10 @@
   cursor: pointer;
 }
 
-/* Loading */
+.admin-reset-filter:hover {
+  background: #314875;
+}
+/* LOADING */
 
 .admin-loading {
   display: flex;
@@ -458,7 +581,8 @@
 .admin-spinner {
   width: 42px;
   height: 42px;
-  border: 4px solid #dce4f1;
+  border:
+    4px solid #dce4f1;
   border-top-color: #40598c;
   border-radius: 50%;
   animation:
@@ -470,76 +594,10 @@
 
 @keyframes admin-spin {
   to {
-    transform:
-      rotate(360deg);
+    transform: rotate(360deg);
   }
 }
-
-/* Responsive */
-
-@media (
-  max-width: 900px
-) {
-  .admin-stats-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
-  }
-
-  .admin-screening-header {
-    align-items:
-      flex-start;
-    flex-direction:
-      column;
-  }
-}
-
-@media (
-  max-width: 650px
-) {
-  .admin-screening-page {
-    padding:
-      28px
-      14px;
-  }
-
-  .admin-stats-grid {
-    grid-template-columns:
-      1fr;
-  }
-
-  .admin-filters {
-    align-items:
-      stretch;
-    flex-direction:
-      column;
-  }
-
-  .admin-filters select {
-    width: 100%;
-  }
-
-  .admin-refresh-button {
-    width: 100%;
-  }
-
-  .admin-screening-header h1 {
-    font-size: 34px;
-  }
-}
-.candidate-link {
-  color: #243452;
-  font-size: 15px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.candidate-link:hover {
-  color: #40598c;
-  text-decoration: underline;
-}/* Candidate Details */
+/* CANDIDATE DETAILS */
 
 .candidate-details-header {
   margin-bottom: 24px;
@@ -567,10 +625,16 @@
 .candidate-details-header p:not(
   .admin-eyebrow
 ) {
-  margin: 10px 0 0;
+  margin:
+    10px
+    0
+    0;
   color: #64748b;
   line-height: 1.7;
 }
+
+
+/* CANDIDATE CARD */
 
 .candidate-card {
   padding: 30px;
@@ -579,9 +643,7 @@
   background: #ffffff;
   box-shadow:
     0 12px 35px
-    rgb(
-      31 42 68 / 9%
-    );
+    rgb(31 42 68 / 9%);
 }
 
 .candidate-card-top {
@@ -614,13 +676,19 @@
 }
 
 .candidate-card-top p {
-  margin: 6px 0 0;
+  margin:
+    6px
+    0
+    0;
   color: #64748b;
 }
 
 .candidate-card-top .status-badge {
   margin-left: auto;
 }
+
+
+/*CANDIDATE DETAILS GRID */
 
 .candidate-details-grid {
   display: grid;
@@ -658,6 +726,9 @@
   overflow-wrap: anywhere;
 }
 
+
+/* CANDIDATE ACTION */
+
 .candidate-actions {
   display: flex;
   gap: 12px;
@@ -685,16 +756,103 @@
   text-decoration: none;
 }
 
-@media (
-  max-width: 650px
-) {
+.admin-back-button:hover {
+  background: #314875;
+}
+
+
+/* RESPONSIVE - TABLET */
+
+@media (max-width: 850px) {
+
+  .admin-screening-page {
+    padding:
+      36px
+      18px;
+  }
+
+  .admin-screening-header {
+    gap: 20px;
+  }
+
+  .admin-header-actions {
+    width: 125px;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+}
+
+
+/* RESPONSIVE - MOBILE */
+
+@media (max-width: 650px) {
+
+  .admin-screening-page {
+    padding:
+      28px
+      14px;
+  }
+
+
+  /* Header */
+
+  .admin-screening-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .admin-header-actions {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .admin-new-job-button,
+  .admin-refresh-button {
+    flex: 1;
+  }
+
+
+  /* Stats */
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* Search */
+
+  .admin-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-filters select {
+    width: 100%;
+  }
+
+
+  /* Heading */
+
+  .admin-screening-header h1 {
+    font-size: 34px;
+  }
+
+
+  /* Candidate details */
+
   .candidate-card {
     padding: 20px;
   }
 
   .candidate-card-top {
-    align-items:
-      flex-start;
+    align-items: flex-start;
     flex-wrap: wrap;
   }
 
@@ -703,13 +861,11 @@
   }
 
   .candidate-details-grid {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
   .candidate-actions {
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .candidate-actions button {
@@ -718,5 +874,201 @@
 
   .candidate-details-header h1 {
     font-size: 34px;
+  }
+
+}
+
+   /* VERY SMALL MOBILE */
+
+@media (max-width: 450px) {
+
+  .admin-header-actions {
+    flex-direction: column;
+  }
+
+  .admin-new-job-button,
+  .admin-refresh-button {
+    width: 100%;
+  }
+
+  .admin-search-box input {
+    padding-right: 70px;
+  }
+
+}
+/* Reject Confirmation Modal */
+
+.confirmation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.confirmation-modal {
+  width: min(440px, 100%);
+
+  padding: 30px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 25px 60px
+    rgba(15, 23, 42, 0.22);
+
+  text-align: center;
+
+  animation:
+    confirmation-modal-in
+    0.2s ease-out;
+}
+
+@keyframes confirmation-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0)
+      scale(1);
+  }
+}
+
+.confirmation-icon {
+  display: flex;
+
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto 18px;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #fff1f1;
+  color: #bd3f3f;
+
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.confirmation-modal h2 {
+  margin: 0;
+
+  color: #1f2a44;
+
+  font-size: 23px;
+  font-weight: 750;
+}
+
+.confirmation-modal p {
+  margin: 12px 0 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.confirmation-modal p strong {
+  color: #243452;
+}
+
+.confirmation-warning {
+  margin-top: 8px !important;
+
+  color: #8b4a4a !important;
+  font-size: 13px !important;
+}
+
+.confirmation-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 26px;
+}
+
+.confirmation-cancel,
+.confirmation-reject {
+  min-height: 44px;
+
+  padding: 0 18px;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.confirmation-cancel {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  color: #475569;
+}
+
+.confirmation-cancel:hover {
+  background: #f8fafc;
+}
+
+.confirmation-reject {
+  border: none;
+
+  background: #bd3f3f;
+
+  color: #ffffff;
+}
+
+.confirmation-reject:hover:not(:disabled) {
+  background: #a83232;
+
+  transform: translateY(-1px);
+}
+
+.confirmation-cancel:disabled,
+.confirmation-reject:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 500px) {
+  .confirmation-modal {
+    padding: 24px 20px;
+  }
+
+  .confirmation-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirmation-cancel,
+  .confirmation-reject {
+    width: 100%;
   }
 }

@@ -46,6 +46,9 @@ function AdminScreeningPage() {
   const [statusFilter, setStatusFilter] =
     useState<"all" | ApplicationStatus>("all");
 
+    const [rejectingApplication, setRejectingApplication] =
+  useState<Application | null>(null);
+
   useEffect(() => {
     loadDashboard();
   }, []);
@@ -224,6 +227,16 @@ function AdminScreeningPage() {
             </p>
           </div>
 
+
+ <div className="admin-screening-header-actions">
+
+    <Link
+      to="/admin/jobs/create"
+      className="admin-new-job-button"
+    >
+      + New Job
+    </Link>
+
           <button
             type="button"
             className="admin-refresh-button"
@@ -231,6 +244,7 @@ function AdminScreeningPage() {
           >
             Refresh
           </button>
+          </div>
         </header>
 
         {stats && (
@@ -589,30 +603,18 @@ function AdminScreeningPage() {
                               }
 
                             </button>
-
-                            <button
-                              type="button"
-                              className="reject-button"
-                              disabled={
-                                updatingId ===
-                                application.id
-                              }
-                              onClick={() =>
-                                handleStatusUpdate(
-                                  application.id,
-                                  "rejected",
-                                )
-                              }
-                            >
-
-                              {
-                                updatingId ===
-                                application.id
-                                  ? "Updating..."
-                                  : "Reject"
-                              }
-
-                            </button>
+<button
+  type="button"
+  className="reject-button"
+  disabled={
+    updatingId === application.id
+  }
+  onClick={() =>
+    setRejectingApplication(application)
+  }
+>
+  Reject
+</button>
 
                           </div>
 
@@ -633,6 +635,81 @@ function AdminScreeningPage() {
         )}
 
       </section>
+      {rejectingApplication && (
+  <div
+    className="confirmation-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reject-title"
+  >
+    <div className="confirmation-modal">
+
+      <div className="confirmation-icon">
+        !
+      </div>
+
+      <h2 id="reject-title">
+        Reject Candidate?
+      </h2>
+
+      <p>
+        Are you sure you want to reject{" "}
+        <strong>
+          {rejectingApplication.fullName}
+        </strong>
+        ?
+      </p>
+
+      <p className="confirmation-warning">
+        This action will update the
+        application status to Rejected.
+      </p>
+
+      <div className="confirmation-actions">
+
+        <button
+          type="button"
+          className="confirmation-cancel"
+          onClick={() =>
+            setRejectingApplication(null)
+          }
+          disabled={
+            updatingId ===
+            rejectingApplication.id
+          }
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          className="confirmation-reject"
+          disabled={
+            updatingId ===
+            rejectingApplication.id
+          }
+          onClick={async () => {
+
+            await handleStatusUpdate(
+              rejectingApplication.id,
+              "rejected",
+            );
+
+            setRejectingApplication(null);
+
+          }}
+        >
+          {updatingId ===
+          rejectingApplication.id
+            ? "Rejecting..."
+            : "Reject Candidate"}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </main>
   );
 }

@@ -205,8 +205,7 @@ function JobsPage() {
                 )
             }
             placeholder="
-              Search by job title,
-              location, or keyword...
+              Search by job title,location...
             "
             aria-label="
               Search available jobs
@@ -284,8 +283,8 @@ function JobsPage() {
                           job-department
                         "
                       >
-
-                        OPEN POSITION
+                      <p>{job.department}</p>
+                        
 
                       </span>
 
@@ -340,6 +339,11 @@ function JobsPage() {
                       }
 
                     </span>
+                    <span>
+
+                     deadline: {job.closingDate}
+
+                    </span>
 
                   </div>
 
@@ -355,7 +359,7 @@ function JobsPage() {
                   "
                 >
 
-                  View & Apply
+                  View
 
                   <span>
                     →

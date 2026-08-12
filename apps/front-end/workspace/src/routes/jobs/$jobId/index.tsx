@@ -20,7 +20,7 @@ import "@/styles/job-details.css";
 
 
 export const Route = createFileRoute(
-  "/jobs/$jobId",
+  "/jobs/$jobId/",
 )({
   component: JobDetailsPage,
 });
