@@ -145,8 +145,8 @@ function ApplyPage() {
         phone:
           phone.trim(),
 
-        resumeName:
-          resume!.name,
+        resume:
+          resume!,
 
       });
 
@@ -335,12 +335,12 @@ function ApplyPage() {
               </label>
 
               <input
-  id="phone"
-  type="tel"
-  value={phone}
-  maxLength={10}
-  inputMode="numeric"
-  onChange={(event) => {
+                id="phone"
+                type="tel"
+                value={phone}
+                maxLength={10}
+                inputMode="numeric"
+                onChange={(event) => {
     const value =
       event.target.value.replace(/\D/g, "");
 

@@ -10,7 +10,11 @@ export type Application = {
   fullName: string;
   email: string;
   phone: string;
+
   resumeName: string;
+  resumeUrl: string;
+
+
   status: ApplicationStatus;
   createdAt: string;
   updatedAt: string;

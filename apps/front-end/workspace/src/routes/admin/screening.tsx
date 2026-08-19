@@ -306,9 +306,7 @@ function AdminScreeningPage() {
                 )
               }
               placeholder="
-                Search by name, email,
-                phone, or job title...
-              "
+                Search by name, email, phone, or job title..."
               aria-label="
                 Search applications
               "

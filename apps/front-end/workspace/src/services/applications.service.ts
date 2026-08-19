@@ -11,7 +11,7 @@ export type CreateApplicationData = {
   fullName: string;
   email: string;
   phone: string;
-  resumeName: string;
+  resume: File;
 };
 
 export type ApplicationStats = {
@@ -21,19 +21,26 @@ export type ApplicationStats = {
   rejected: number;
 };
 
+/**
+ * Candidate submits application
+ * Includes CV file upload.
+ */
 export async function createApplication(
   data: CreateApplicationData,
 ): Promise<ApplicationResponse> {
+  const formData = new FormData();
+
+  formData.append("jobId", String(data.jobId));
+  formData.append("fullName", data.fullName);
+  formData.append("email", data.email);
+  formData.append("phone", data.phone);
+  formData.append("resume", data.resume);
+
   const response = await fetch(
     `${API_URL}/applications`,
     {
       method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
-      body: JSON.stringify(data),
+      body: formData,
     },
   );
 
@@ -42,19 +49,16 @@ export async function createApplication(
       "Failed to submit application.";
 
     try {
-      const errorData =
-        await response.json();
+      const errorData = await response.json();
 
       if (
         errorData &&
-        typeof errorData.message ===
-          "string"
+        typeof errorData.message === "string"
       ) {
-        message =
-          errorData.message;
+        message = errorData.message;
       }
     } catch {
-      // Keep the default error message.
+      // Keep default error message.
     }
 
     throw new Error(message);
@@ -63,6 +67,9 @@ export async function createApplication(
   return response.json();
 }
 
+/**
+ * Admin gets all applications
+ */
 export async function getAllApplications(): Promise<
   ApplicationsResponse
 > {
@@ -75,19 +82,16 @@ export async function getAllApplications(): Promise<
       "Failed to load applications.";
 
     try {
-      const errorData =
-        await response.json();
+      const errorData = await response.json();
 
       if (
         errorData &&
-        typeof errorData.message ===
-          "string"
+        typeof errorData.message === "string"
       ) {
-        message =
-          errorData.message;
+        message = errorData.message;
       }
     } catch {
-      // Keep the default error message.
+      // Keep default error message.
     }
 
     throw new Error(message);
@@ -96,6 +100,9 @@ export async function getAllApplications(): Promise<
   return response.json();
 }
 
+/**
+ * Get application by ID
+ */
 export async function getApplicationById(
   applicationId: number,
 ): Promise<ApplicationResponse> {
@@ -108,19 +115,16 @@ export async function getApplicationById(
       "Failed to fetch application.";
 
     try {
-      const errorData =
-        await response.json();
+      const errorData = await response.json();
 
       if (
         errorData &&
-        typeof errorData.message ===
-          "string"
+        typeof errorData.message === "string"
       ) {
-        message =
-          errorData.message;
+        message = errorData.message;
       }
     } catch {
-      // Keep the default error message.
+      // Keep default error message.
     }
 
     throw new Error(message);
@@ -129,6 +133,9 @@ export async function getApplicationById(
   return response.json();
 }
 
+/**
+ * Approve or reject application
+ */
 export async function updateApplicationStatus(
   applicationId: number,
   status: ApplicationStatus,
@@ -153,19 +160,16 @@ export async function updateApplicationStatus(
       "Failed to update application status.";
 
     try {
-      const errorData =
-        await response.json();
+      const errorData = await response.json();
 
       if (
         errorData &&
-        typeof errorData.message ===
-          "string"
+        typeof errorData.message === "string"
       ) {
-        message =
-          errorData.message;
+        message = errorData.message;
       }
     } catch {
-      // Keep the default error message.
+      // Keep default error message.
     }
 
     throw new Error(message);
@@ -174,6 +178,9 @@ export async function updateApplicationStatus(
   return response.json();
 }
 
+/**
+ * Get application statistics
+ */
 export async function getApplicationStats(): Promise<{
   data: ApplicationStats;
 }> {
@@ -186,19 +193,16 @@ export async function getApplicationStats(): Promise<{
       "Failed to load application statistics.";
 
     try {
-      const errorData =
-        await response.json();
+      const errorData = await response.json();
 
       if (
         errorData &&
-        typeof errorData.message ===
-          "string"
+        typeof errorData.message === "string"
       ) {
-        message =
-          errorData.message;
+        message = errorData.message;
       }
     } catch {
-      // Keep the default error message.
+      // Keep default error message.
     }
 
     throw new Error(message);

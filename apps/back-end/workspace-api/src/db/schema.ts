@@ -163,6 +163,8 @@ export const applications = pgTable(
       },
     ).notNull(),
 
+    resumeUrl: text("resume_url"),
+
     resumePath: varchar("resume_path", {
   length: 500,
 }),

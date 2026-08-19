@@ -1,0 +1,1 @@
+ALTER TABLE "applications" ALTER COLUMN "resume_path" SET DATA TYPE varchar(400);

@@ -11,132 +11,107 @@ import {
   updateApplicationStatus,
 } from "../services/applications.js";
 
-
 const applicationsRouter = new Hono();
 
-
 // Admin gets all applications
-applicationsRouter.get(
-  "/",
-  async (c) => {
-    const applications =
-      await getAllApplications();
+applicationsRouter.get("/", async (c) => {
+  const applications = await getAllApplications();
 
-    return c.json({
-      data: applications,
-    });
-  },
-);
-
+  return c.json({
+    data: applications,
+  });
+});
 
 // Candidate submits application
-applicationsRouter.post(
-  "/",
-  async (c) => {
-    const body = await c.req.parseBody();
+applicationsRouter.post("/", async (c) => {
+  const body = await c.req.parseBody();
 
-    const result =
-      createApplicationSchema.safeParse(body);
+  const resume = body.resume;
 
-    if (!result.success) {
-      return c.json(
-        {
-          message: "Validation failed.",
-          errors: result.error.flatten(),
-        },
-        400,
-      );
-    }
+  const data = {
+    jobId: Number(body.jobId),
+    fullName: String(body.fullName ?? ""),
+    email: String(body.email ?? ""),
+    phone: String(body.phone ?? ""),
+    resume,
+  };
 
+  const result =
+    createApplicationSchema.safeParse(data);
 
-    const application =
-      await createApplication(
-        result.data,
-      );
+  if (!result.success) {
+    return c.json(
+      {
+        message: "Validation failed.",
+        errors: result.error.flatten(),
+      },
+      400,
+    );
+  }
 
+  const application =
+    await createApplication(result.data);
 
+  return c.json(
+    {
+      message:
+        "Application submitted successfully.",
+      data: application,
+    },
+    201,
+  );
+},
+);
+
+// Get application statistics
+applicationsRouter.get("/stats", async (c) => {
+  const stats =
+    await getApplicationStats();
+
+  return c.json({
+    data: stats,
+  });
+});
+
+// Get application by ID
+applicationsRouter.get("/:id", async (c) => {
+  const id = Number(c.req.param("id"));
+
+  if (!Number.isInteger(id) || id <= 0) {
     return c.json(
       {
         message:
-          "Application submitted successfully.",
-        data: application,
+          "Invalid application ID.",
       },
-      201,
+      400,
     );
-  },
-);
+  }
 
+  const application =
+    await getApplicationById(id);
 
-// Get application statistics
-// IMPORTANT: keep before /:id
-applicationsRouter.get(
-  "/stats",
-  async (c) => {
-    const stats =
-      await getApplicationStats();
-
-    return c.json({
-      data: stats,
-    });
-  },
-);
-
-
-// Get application by ID
-applicationsRouter.get(
-  "/:id",
-  async (c) => {
-
-    const id = Number(
-      c.req.param("id"),
+  if (!application) {
+    return c.json(
+      {
+        message:
+          "Application not found.",
+      },
+      404,
     );
+  }
 
-
-    if (
-      !Number.isInteger(id) ||
-      id <= 0
-    ) {
-      return c.json(
-        {
-          message:
-            "Invalid application ID.",
-        },
-        400,
-      );
-    }
-
-
-    const application =
-      await getApplicationById(id);
-
-
-    if (!application) {
-      return c.json(
-        {
-          message:
-            "Application not found.",
-        },
-        404,
-      );
-    }
-
-
-    return c.json({
-      data: application,
-    });
-  },
-);
-
+  return c.json({
+    data: application,
+  });
+});
 
 // Get applications by job ID
 applicationsRouter.get(
   "/job/:jobId",
   async (c) => {
-
     const jobId = Number(
       c.req.param("jobId"),
     );
-
 
     if (
       !Number.isInteger(jobId) ||
@@ -151,12 +126,8 @@ applicationsRouter.get(
       );
     }
 
-
     const applications =
-      await getApplicationsByJobId(
-        jobId,
-      );
-
+      await getApplicationsByJobId(jobId);
 
     return c.json({
       data: applications,
@@ -164,16 +135,13 @@ applicationsRouter.get(
   },
 );
 
-
 // Admin approves or rejects application
 applicationsRouter.patch(
   "/:id/status",
   async (c) => {
-
     const id = Number(
       c.req.param("id"),
     );
-
 
     if (
       !Number.isInteger(id) ||
@@ -188,10 +156,8 @@ applicationsRouter.patch(
       );
     }
 
-
     const body =
       await c.req.json();
-
 
     if (
       body.status !== "approved" &&
@@ -206,13 +172,11 @@ applicationsRouter.patch(
       );
     }
 
-
     const updatedApplication =
       await updateApplicationStatus(
         id,
         body.status,
       );
-
 
     if (!updatedApplication) {
       return c.json(
@@ -224,7 +188,6 @@ applicationsRouter.patch(
       );
     }
 
-
     return c.json({
       message:
         `Application ${body.status} successfully.`,
@@ -232,6 +195,5 @@ applicationsRouter.patch(
     });
   },
 );
-
 
 export default applicationsRouter;

@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
 } from "@tanstack/react-router";
+
 import {
   useEffect,
   useState,
@@ -18,13 +19,11 @@ import type {
 
 import "@/styles/admin-screening.css";
 
-
 export const Route = createFileRoute(
   "/admin/applications/$applicationId",
 )({
   component: CandidateDetailsPage,
 });
-
 
 function CandidateDetailsPage() {
   const { applicationId } =
@@ -42,11 +41,9 @@ function CandidateDetailsPage() {
   const [updating, setUpdating] =
     useState(false);
 
-
   useEffect(() => {
     loadApplication();
   }, [applicationId]);
-
 
   async function loadApplication() {
     try {
@@ -58,10 +55,7 @@ function CandidateDetailsPage() {
           Number(applicationId),
         );
 
-      setApplication(
-        response.data,
-      );
-
+      setApplication(response.data);
     } catch (error) {
       console.error(
         "Failed to load application:",
@@ -73,12 +67,10 @@ function CandidateDetailsPage() {
           ? error.message
           : "Failed to load application.",
       );
-
     } finally {
       setLoading(false);
     }
   }
-
 
   async function changeStatus(
     status:
@@ -95,10 +87,7 @@ function CandidateDetailsPage() {
           status,
         );
 
-      setApplication(
-        response.data,
-      );
-
+      setApplication(response.data);
     } catch (error) {
       console.error(
         "Failed to update status:",
@@ -110,12 +99,10 @@ function CandidateDetailsPage() {
           ? error.message
           : "Failed to update application status.",
       );
-
     } finally {
       setUpdating(false);
     }
   }
-
 
   function formatStatus(
     status: string,
@@ -126,34 +113,25 @@ function CandidateDetailsPage() {
     );
   }
 
-
   if (loading) {
     return (
       <main className="admin-screening-page">
-
         <div className="admin-loading">
-
           <div className="admin-spinner" />
 
           <p>
             Loading candidate...
           </p>
-
         </div>
-
       </main>
     );
   }
 
-
   if (!application) {
     return (
       <main className="admin-screening-page">
-
         <section className="admin-screening-container">
-
           <div className="admin-empty-state">
-
             <h2>
               Application not found
             </h2>
@@ -169,23 +147,17 @@ function CandidateDetailsPage() {
             >
               Back to applications
             </Link>
-
           </div>
-
         </section>
-
       </main>
     );
   }
 
-
   return (
     <main className="admin-screening-page">
-
       <section className="admin-screening-container">
 
         <header className="candidate-details-header">
-
           <div>
 
             <Link
@@ -209,38 +181,29 @@ function CandidateDetailsPage() {
             </p>
 
           </div>
-
         </header>
 
-
         {error && (
-
           <div
             className="admin-action-error"
             role="alert"
           >
-
             {error}
-
           </div>
-
         )}
-
 
         <div className="candidate-card">
 
+          {/* Candidate Header */}
           <div className="candidate-card-top">
 
             <div className="candidate-avatar">
-
               {application.fullName
                 .charAt(0)
                 .toUpperCase()}
-
             </div>
 
             <div>
-
               <h2>
                 {application.fullName}
               </h2>
@@ -249,29 +212,22 @@ function CandidateDetailsPage() {
                 {application.jobTitle ??
                   `Job #${application.jobId}`}
               </p>
-
             </div>
 
-
             <span
-              className={
-                `status-badge ${application.status}`
-              }
+              className={`status-badge ${application.status}`}
             >
-
               {formatStatus(
                 application.status,
               )}
-
             </span>
 
           </div>
 
-
+          {/* Candidate Information */}
           <div className="candidate-details-grid">
 
             <div className="candidate-detail-item">
-
               <span>
                 Email
               </span>
@@ -279,12 +235,9 @@ function CandidateDetailsPage() {
               <strong>
                 {application.email}
               </strong>
-
             </div>
 
-
             <div className="candidate-detail-item">
-
               <span>
                 Phone
               </span>
@@ -292,12 +245,9 @@ function CandidateDetailsPage() {
               <strong>
                 {application.phone}
               </strong>
-
             </div>
 
-
             <div className="candidate-detail-item">
-
               <span>
                 Position
               </span>
@@ -306,11 +256,10 @@ function CandidateDetailsPage() {
                 {application.jobTitle ??
                   `Job #${application.jobId}`}
               </strong>
-
             </div>
 
-
-            <div className="candidate-detail-item">
+            {/* CV */}
+            <div className="candidate-detail-item resume-item">
 
               <span>
                 Resume
@@ -324,7 +273,43 @@ function CandidateDetailsPage() {
 
           </div>
 
+          {/* CV Preview */}
+          {application.resumeUrl ? (
+            <div className="cv-preview-section">
 
+              <h3>
+                CV Preview
+              </h3>
+
+              <iframe
+                src={application.resumeUrl}
+                title={`${application.fullName}'s CV`}
+                className="cv-preview-iframe"
+              />
+
+              <div className="cv-preview-actions">
+
+                <a
+                  href={application.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-cv-button"
+                >
+                  Open CV in New Tab
+                </a>
+
+              </div>
+
+            </div>
+          ) : (
+            <div className="cv-not-available">
+              <p>
+                CV not available.
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
           <div className="candidate-actions">
 
             <button
@@ -332,34 +317,25 @@ function CandidateDetailsPage() {
               className="approve-button"
               disabled={updating}
               onClick={() =>
-                changeStatus(
-                  "approved",
-                )
+                changeStatus("approved")
               }
             >
-
               {updating
                 ? "Updating..."
                 : "Approve Candidate"}
-
             </button>
-
 
             <button
               type="button"
               className="reject-button"
               disabled={updating}
               onClick={() =>
-                changeStatus(
-                  "rejected",
-                )
+                changeStatus("rejected")
               }
             >
-
               {updating
                 ? "Updating..."
                 : "Reject Candidate"}
-
             </button>
 
           </div>
@@ -367,7 +343,6 @@ function CandidateDetailsPage() {
         </div>
 
       </section>
-
     </main>
   );
 }

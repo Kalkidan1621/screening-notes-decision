@@ -1,7 +1,6 @@
 import {
   HeadContent,
   Scripts,
-  Link,
   createRootRoute,
 } from "@tanstack/react-router";
 
@@ -14,9 +13,11 @@ import {
 } from "@tanstack/react-devtools";
 
 import appCss from "../styles.css?url";
-
 import "../styles/root-navigation.css";
 
+import Header from "../components/header";
+
+import Footer from "../components/footer";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -45,7 +46,6 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 });
 
-
 function RootDocument({
   children,
 }: {
@@ -53,52 +53,18 @@ function RootDocument({
 }) {
   return (
     <html lang="en">
-
       <head>
         <HeadContent />
       </head>
 
       <body>
 
-        <header className="site-navigation">
-
-          <nav className="site-navigation-links">
-
-            <Link
-              to="/"
-              className="site-navigation-link"
-              activeProps={{
-                className:
-                  "site-navigation-link active",
-              }}
-            >
-              Candidate View
-            </Link>
-
-
-            <Link
-              to="/admin/screening"
-              className="site-navigation-link"
-              activeProps={{
-                className:
-                  "site-navigation-link active",
-              }}
-            >
-              Admin Dashboard
-            </Link>
-
-          </nav>
-
-        </header>
-
+        <Header />
 
         <div className="site-page-content">
-
           {children}
-
         </div>
-
-
+         <Footer />
         <TanStackDevtools
           config={{
             position: "bottom-right",
@@ -106,17 +72,16 @@ function RootDocument({
           plugins={[
             {
               name: "Tanstack Router",
-              render:
-                <TanStackRouterDevtoolsPanel />,
+              render: (
+                <TanStackRouterDevtoolsPanel />
+              ),
             },
           ]}
         />
 
-
         <Scripts />
 
       </body>
-
     </html>
   );
 }

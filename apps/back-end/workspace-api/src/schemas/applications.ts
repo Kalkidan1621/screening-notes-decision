@@ -21,16 +21,24 @@ export const createApplicationSchema = z.object({
   phone: z
     .string()
     .trim()
-    .min(7, "Phone number must be at least 7 characters.")
-    .max(50, "Phone number cannot exceed 50 characters."),
+    .regex(
+      /^\d{10}$/,
+      "Phone number must contain exactly 10 digits.",
+    ),
 
-  resumeName: z
-    .string()
-    .trim()
-    .min(1, "Please upload your resume.")
-    .max(255, "Resume file name cannot exceed 255 characters."),
+  resume: z.custom<File>(
+    (value) => {
+      return (
+        value !== null &&
+        typeof value === "object" &&
+        "name" in value
+      );
+    },
+    {
+      message: "Please upload your resume.",
+    },
+  ),
 });
 
-export type CreateApplicationInput = z.infer<
-  typeof createApplicationSchema
->;
+export type CreateApplicationInput =
+  z.infer<typeof createApplicationSchema>;
