@@ -40,8 +40,8 @@ export default function Footer() {
           <a href="#" aria-label="Instagram">◎</a>
           <a href="#" aria-label="X">𝕏</a>
           <a href="#" aria-label="Telegram">➤</a>
-          <a href="#" aria-label="LinkedIn">in</a>
-          <a href="#" aria-label="Telegram">✈</a>
+          <a href="#" aria-label="LinkedIn">ln</a>
+          
         </div>
 
       </div>
