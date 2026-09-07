@@ -1,0 +1,1 @@
+ALTER TABLE "applications" ALTER COLUMN "candidate_id" DROP NOT NULL;

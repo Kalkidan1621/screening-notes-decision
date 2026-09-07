@@ -1,0 +1,71 @@
+/* =========================================================
+   ADMIN PAGE LAYOUT
+   Root Header + Root Footer remain untouched.
+   ========================================================= */
+
+.admin-layout {
+  width: 100%;
+
+  min-height: 720px;
+
+  display: flex;
+  align-items: stretch;
+
+  background: #f6f8fb;
+
+  box-sizing: border-box;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+
+  background: #f6f8fb;
+
+  box-sizing: border-box;
+
+  overflow-x: hidden;
+}
+
+.admin-content {
+  width: 100%;
+  min-width: 0;
+
+  padding: 28px 32px 40px;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   LARGE SCREEN
+   ========================================================= */
+
+@media (min-width: 1400px) {
+  .admin-content {
+    padding: 32px 40px 48px;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .admin-content {
+    padding: 24px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .admin-content {
+    padding: 18px 14px 30px;
+  }
+
+  .admin-layout {
+    min-height: 600px;
+  }
+}

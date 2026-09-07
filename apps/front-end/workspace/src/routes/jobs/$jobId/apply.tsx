@@ -1,11 +1,18 @@
 import {
   createFileRoute,
+  Link,
+  useNavigate,
 } from "@tanstack/react-router";
 
 import {
+  useEffect,
   useState,
   type FormEvent,
 } from "react";
+
+import {
+  getCurrentUser,
+} from "@/services/auth.service";
 
 import {
   createApplication,
@@ -13,19 +20,19 @@ import {
 
 import "@/styles/job-application.css";
 
-
 export const Route = createFileRoute(
   "/jobs/$jobId/apply",
 )({
   component: ApplyPage,
 });
 
-
 function ApplyPage() {
+  const { jobId } = Route.useParams();
 
-  const { jobId } =
-    Route.useParams();
+  const navigate = useNavigate();
 
+  const [checkingAuth, setCheckingAuth] =
+    useState(true);
 
   const [fullName, setFullName] =
     useState("");
@@ -39,189 +46,261 @@ function ApplyPage() {
   const [resume, setResume] =
     useState<File | null>(null);
 
-
-  const [errors, setErrors] =
-    useState<{
-      fullName?: string;
-      email?: string;
-      phone?: string;
-      resume?: string;
-    }>({});
-
-
-  const [message, setMessage] =
-    useState("");
-
-
-  const [submitting, setSubmitting] =
-    useState(false);
-
-
-  function validateForm() {
-  const newErrors: {
+  const [errors, setErrors] = useState<{
     fullName?: string;
     email?: string;
     phone?: string;
     resume?: string;
-  } = {};
+  }>({});
 
-  // Full Name
-  if (!fullName.trim()) {
-    newErrors.fullName =
-      "Full name is required.";
-  }
+  const [message, setMessage] =
+    useState("");
 
-  // Email
-  if (!email.trim()) {
-    newErrors.email =
-      "Email is required.";
-  } else {
-    const emailPattern =
-      /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const [submitting, setSubmitting] =
+    useState(false);
 
-    if (!emailPattern.test(email.trim())) {
+  // ========================================
+  // CHECK CANDIDATE LOGIN
+  // ========================================
+
+  useEffect(() => {
+    async function checkAuthentication() {
+      try {
+        const response =
+          await getCurrentUser();
+
+        const user = response.data;
+
+        if (!user) {
+          await navigate({
+            to: "/candidate/register",
+            search: {
+              redirect: `/jobs/${jobId}/apply`,
+            },
+          });
+
+          return;
+        }
+
+        // Only candidates can apply
+        if (user.role !== "CANDIDATE") {
+          setMessage(
+            "Only candidates can submit job applications.",
+          );
+
+          return;
+        }
+
+        // Automatically fill candidate information
+        setFullName(
+          `${user.firstName} ${user.lastName}`.trim(),
+        );
+
+        setEmail(user.email);
+      } catch (error) {
+        console.error(
+          "Authentication check failed:",
+          error,
+        );
+
+        await navigate({
+          to: "/candidate/register",
+          search: {
+            redirect: `/jobs/${jobId}/apply`,
+          },
+        });
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+
+    checkAuthentication();
+  }, [jobId, navigate]);
+
+  // ========================================
+  // VALIDATION
+  // ========================================
+
+  function validateForm() {
+    const newErrors: {
+      fullName?: string;
+      email?: string;
+      phone?: string;
+      resume?: string;
+    } = {};
+
+    // Full Name
+    if (!fullName.trim()) {
+      newErrors.fullName =
+        "Full name is required.";
+    }
+
+    // Email
+    if (!email.trim()) {
       newErrors.email =
-        "Please enter a valid Gmail address. Example: you@gmail.com.";
+        "Email is required.";
+    } else {
+      const emailPattern =
+        /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+      if (
+        !emailPattern.test(
+          email.trim(),
+        )
+      ) {
+        newErrors.email =
+          "Please enter a valid Gmail address. Example: you@gmail.com.";
+      }
     }
-  }
 
-  // Phone
-  if (!phone.trim()) {
-    newErrors.phone =
-      "Phone number is required.";
-  } else {
-    const phonePattern =
-      /^\d{10}$/;
-
-    if (!phonePattern.test(phone.trim())) {
+    // Phone
+    if (!phone.trim()) {
       newErrors.phone =
-        "Phone number must contain exactly 10 digits.";
+        "Phone number is required.";
+    } else {
+      const phonePattern =
+        /^\d{10}$/;
+
+      if (
+        !phonePattern.test(
+          phone.trim(),
+        )
+      ) {
+        newErrors.phone =
+          "Phone number must contain exactly 10 digits.";
+      }
     }
+
+    // Resume
+    if (!resume) {
+      newErrors.resume =
+        "Please upload your resume.";
+    }
+
+    setErrors(newErrors);
+
+    return (
+      Object.keys(newErrors).length === 0
+    );
   }
 
-  // Resume
-  if (!resume) {
-    newErrors.resume =
-      "Please upload your resume.";
-  }
+  // ========================================
+  // SUBMIT APPLICATION
+  // ========================================
 
-  setErrors(newErrors);
-
-  return Object.keys(newErrors).length === 0;
-}
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
-
     event.preventDefault();
 
     setMessage("");
 
-
     const isValid =
       validateForm();
-
 
     if (!isValid) {
       return;
     }
 
-
     try {
-
       setSubmitting(true);
 
-
       await createApplication({
-
         jobId: Number(jobId),
-
-        fullName:
-          fullName.trim(),
-
-        email:
-          email.trim(),
-
-        phone:
-          phone.trim(),
-
-        resume:
-          resume!,
-
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        resume: resume!,
       });
-
 
       setMessage(
         "Application submitted successfully!",
       );
 
-
-      setFullName("");
-      setEmail("");
       setPhone("");
       setResume(null);
-
       setErrors({});
-
-
     } catch (error) {
-
       console.error(
         "Application failed:",
         error,
       );
-
 
       setMessage(
         error instanceof Error
           ? error.message
           : "Failed to submit application.",
       );
-
     } finally {
-
       setSubmitting(false);
-
     }
   }
 
+  // ========================================
+  // AUTH CHECK LOADING
+  // ========================================
+
+  if (checkingAuth) {
+    return (
+      <main className="job-application-page">
+        <div className="job-application-container">
+          <section className="job-application-card">
+            <h1>
+              Checking your account...
+            </h1>
+
+            <p>
+              Please wait while we verify
+              your candidate account.
+            </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  // ========================================
+  // APPLICATION FORM
+  // ========================================
 
   return (
+    <main className="job-application-page">
+      <div className="job-application-container">
+        <section className="job-application-card">
 
-    <main
-      className="job-application-page"
-    >
+          <div className="job-application-header">
+            <Link
+              to="/jobs/$jobId"
+              params={{
+                jobId: String(jobId),
+              }}
+              className="back-to-job-link"
+            >
+              ← Back to Job
+            </Link>
 
-      <div
-        className="job-application-container"
-      >
+            <p className="application-eyebrow">
+              CANDIDATE PORTAL
+            </p>
 
-        <section
-          className="job-application-card"
-        >
+            <h1>
+              Apply for Job
+            </h1>
 
-          <h1>
-            Apply for Job
-          </h1>
-
-          <p>
-            Please complete the
-            application form below.
-          </p>
-
+            <p>
+              Complete your application
+              and upload your resume.
+            </p>
+          </div>
 
           <form
             onSubmit={handleSubmit}
             noValidate
           >
 
-
             {/* Full Name */}
 
-            <div
-              className="application-field"
-            >
-
+            <div className="application-field">
               <label htmlFor="fullName">
                 Full Name
               </label>
@@ -231,15 +310,11 @@ function ApplyPage() {
                 type="text"
                 value={fullName}
                 onChange={(event) => {
-
                   setFullName(
                     event.target.value,
                   );
 
-                  if (
-                    errors.fullName
-                  ) {
-
+                  if (errors.fullName) {
                     setErrors(
                       (current) => ({
                         ...current,
@@ -247,35 +322,25 @@ function ApplyPage() {
                           undefined,
                       }),
                     );
-
                   }
-
                 }}
                 placeholder="Enter your full name"
-                aria-invalid={
-                  Boolean(
-                    errors.fullName,
-                  )
-                }
+                autoComplete="name"
+                aria-invalid={Boolean(
+                  errors.fullName,
+                )}
               />
 
               {errors.fullName && (
-
                 <p className="field-error">
                   {errors.fullName}
                 </p>
-
               )}
-
             </div>
-
 
             {/* Email */}
 
-            <div
-              className="application-field"
-            >
-
+            <div className="application-field">
               <label htmlFor="email">
                 Email Address
               </label>
@@ -285,15 +350,11 @@ function ApplyPage() {
                 type="email"
                 value={email}
                 onChange={(event) => {
-
                   setEmail(
                     event.target.value,
                   );
 
-                  if (
-                    errors.email
-                  ) {
-
+                  if (errors.email) {
                     setErrors(
                       (current) => ({
                         ...current,
@@ -301,35 +362,25 @@ function ApplyPage() {
                           undefined,
                       }),
                     );
-
                   }
-
                 }}
                 placeholder="you@gmail.com"
-                aria-invalid={
-                  Boolean(
-                    errors.email,
-                  )
-                }
+                autoComplete="email"
+                aria-invalid={Boolean(
+                  errors.email,
+                )}
               />
 
               {errors.email && (
-
                 <p className="field-error">
                   {errors.email}
                 </p>
-
               )}
-
             </div>
-
 
             {/* Phone */}
 
-            <div
-              className="application-field"
-            >
-
+            <div className="application-field">
               <label htmlFor="phone">
                 Phone Number
               </label>
@@ -340,42 +391,44 @@ function ApplyPage() {
                 value={phone}
                 maxLength={10}
                 inputMode="numeric"
+                autoComplete="tel"
                 onChange={(event) => {
-    const value =
-      event.target.value.replace(/\D/g, "");
+                  const value =
+                    event.target.value.replace(
+                      /\D/g,
+                      "",
+                    );
 
-    setPhone(value);
+                  setPhone(value);
 
-    if (errors.phone) {
-      setErrors((current) => ({
-        ...current,
-        phone: undefined,
-      }));
-    }
-  }}
-  placeholder="0912345678"
-  aria-invalid={Boolean(errors.phone)}
-/>
+                  if (errors.phone) {
+                    setErrors(
+                      (current) => ({
+                        ...current,
+                        phone:
+                          undefined,
+                      }),
+                    );
+                  }
+                }}
+                placeholder="0912345678"
+                aria-invalid={Boolean(
+                  errors.phone,
+                )}
+              />
 
               {errors.phone && (
-
                 <p className="field-error">
                   {errors.phone}
                 </p>
-
               )}
-
             </div>
-
 
             {/* Resume */}
 
-            <div
-              className="application-field"
-            >
-
+            <div className="application-field">
               <label htmlFor="resume">
-                Resume
+                Resume / CV
               </label>
 
               <input
@@ -383,16 +436,13 @@ function ApplyPage() {
                 type="file"
                 accept=".pdf,.doc,.docx"
                 onChange={(event) => {
-
                   const file =
-                    event.target
-                      .files?.[0] ??
+                    event.target.files?.[0] ??
                     null;
 
                   setResume(file);
 
                   if (file) {
-
                     setErrors(
                       (current) => ({
                         ...current,
@@ -400,27 +450,42 @@ function ApplyPage() {
                           undefined,
                       }),
                     );
-
                   }
-
                 }}
-                aria-invalid={
-                  Boolean(
-                    errors.resume,
-                  )
-                }
+                aria-invalid={Boolean(
+                  errors.resume,
+                )}
               />
 
-              {errors.resume && (
+              {resume && (
+                <p className="selected-file">
+                  Selected: {resume.name}
+                </p>
+              )}
 
+              {errors.resume && (
                 <p className="field-error">
                   {errors.resume}
                 </p>
-
               )}
-
             </div>
 
+            {/* Message */}
+
+            {message && (
+              <p
+                className={
+                  message.includes(
+                    "successfully",
+                  )
+                    ? "application-message success"
+                    : "application-message error"
+                }
+                role="alert"
+              >
+                {message}
+              </p>
+            )}
 
             {/* Submit */}
 
@@ -428,38 +493,15 @@ function ApplyPage() {
               type="submit"
               disabled={submitting}
             >
-
               {submitting
                 ? "Submitting..."
                 : "Submit Application"}
-
             </button>
 
-
           </form>
-
-
-          {message && (
-
-            <p
-              className={
-                message.includes(
-                  "successfully",
-                )
-                  ? "application-message success"
-                  : "application-message error"
-              }
-            >
-              {message}
-            </p>
-
-          )}
-
         </section>
-
       </div>
-
     </main>
-
   );
 }
+

@@ -1,0 +1,3 @@
+ALTER TABLE "screening_decisions" RENAME COLUMN "stage_id" TO "application_id";--> statement-breakpoint
+ALTER TABLE "screening_decisions" ADD CONSTRAINT "screening_decisions_application_id_applications_id_fk" FOREIGN KEY ("application_id") REFERENCES "public"."applications"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "screening_decisions" ADD CONSTRAINT "screening_decisions_application_id_unique" UNIQUE("application_id");

@@ -57,6 +57,48 @@
       "when": 1786890684557,
       "tag": "0007_lonely_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787654833277,
+      "tag": "0008_futuristic_nightcrawler",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787739057360,
+      "tag": "0009_condemned_clint_barton",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787836588765,
+      "tag": "0010_gigantic_kate_bishop",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788265683170,
+      "tag": "0011_soft_lucky_pierre",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1788431769592,
+      "tag": "0012_short_wiccan",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788720645307,
+      "tag": "0013_bored_mongoose",
+      "breakpoints": true
     }
   ]
 }

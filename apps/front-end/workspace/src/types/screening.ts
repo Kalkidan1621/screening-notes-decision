@@ -1,9 +1,16 @@
-export type ScreeningDecision = "pass" | "hold" | "reject";
+export type ScreeningDecision =
+  | "pass"
+  | "hold"
+  | "reject";
 
-export interface ScreeningDecisionResponse {
-  data: {
-    decision: ScreeningDecision;
-    note: string;
-    updatedAt: string;
-  } | null;
-}
+export type ScreeningDecisionData = {
+  decision: ScreeningDecision;
+  note: string | null;
+  updatedAt: string;
+};
+
+export type ScreeningDecisionResponse = {
+  success: boolean;
+  data: ScreeningDecisionData | null;
+  message?: string;
+};

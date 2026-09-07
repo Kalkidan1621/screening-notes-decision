@@ -1,7 +1,7 @@
 import { desc, eq, count } from "drizzle-orm";
 
 import { db } from "../db/index.js";
-import { applications, jobs } from "../db/schema.js";
+import { applications, jobs, users, roles, } from "../db/schema.js";
 
 import type {
   CreateApplicationInput,
@@ -11,6 +11,7 @@ import cloudinary from "../config/cloudinary.js";
 
 export async function createApplication(
   data: CreateApplicationInput,
+  candidateId: number,
 ) {
   // Convert File to Buffer
   const arrayBuffer = await data.resume.arrayBuffer();
@@ -27,7 +28,7 @@ export async function createApplication(
 
         // IMPORTANT:
         // CV is a PDF/raw file, not an image
-        resource_type: "image",
+        resource_type: "raw",
 
         public_id: `${Date.now()}-${data.resume.name.replace(
           /\.[^/.]+$/,
@@ -58,6 +59,7 @@ export async function createApplication(
   const result = await db
     .insert(applications)
     .values({
+      candidateId,
       jobId: data.jobId,
       fullName: data.fullName,
       email: data.email,
@@ -141,21 +143,42 @@ export async function getAllApplications() {
   return db
     .select({
       id: applications.id,
-      jobId: applications.jobId,
-      jobTitle: jobs.title,
 
-      fullName: applications.fullName,
-      email: applications.email,
-      phone: applications.phone,
+      candidateId:
+        applications.candidateId,
+
+      candidateFirstName:
+        users.firstName,
+
+      candidateLastName:
+        users.lastName,
+
+      candidateEmail:
+        users.email,
+
+      jobId:
+        applications.jobId,
+
+      jobTitle:
+        jobs.title,
+
+      fullName:
+        applications.fullName,
+
+      email:
+        applications.email,
+
+      phone:
+        applications.phone,
 
       resumeName:
         applications.resumeName,
 
-      // IMPORTANT: return URL for CV viewing
       resumeUrl:
         applications.resumeUrl,
 
-      status: applications.status,
+      status:
+        applications.status,
 
       createdAt:
         applications.createdAt,
@@ -165,11 +188,21 @@ export async function getAllApplications() {
     })
     .from(applications)
     .leftJoin(
+      users,
+      eq(
+        applications.candidateId,
+        users.id,
+      ),
+    )
+    .leftJoin(
       jobs,
       eq(
         applications.jobId,
         jobs.id,
       ),
+    )
+    .orderBy(
+      desc(applications.createdAt),
     );
 }
 
@@ -252,4 +285,45 @@ export async function getApplicationStats() {
     rejected:
       rejectedResult[0]?.count ?? 0,
   };
+}
+export async function getApplicationsByCandidateId(
+  candidateId: number,
+) {
+  return db
+    .select({
+      id: applications.id,
+      candidateId: applications.candidateId,
+
+      jobId: applications.jobId,
+      jobTitle: jobs.title,
+
+      fullName: applications.fullName,
+      email: applications.email,
+      phone: applications.phone,
+
+      resumeName: applications.resumeName,
+      resumeUrl: applications.resumeUrl,
+
+      status: applications.status,
+
+      createdAt: applications.createdAt,
+      updatedAt: applications.updatedAt,
+    })
+    .from(applications)
+    .leftJoin(
+      jobs,
+      eq(
+        applications.jobId,
+        jobs.id,
+      ),
+    )
+    .where(
+      eq(
+        applications.candidateId,
+        candidateId,
+      ),
+    )
+    .orderBy(
+      desc(applications.createdAt),
+    );
 }

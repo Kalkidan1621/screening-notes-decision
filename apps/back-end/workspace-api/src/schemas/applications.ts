@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createApplicationSchema = z.object({
-  jobId: z
+ jobId: z
     .number()
     .int("Job ID must be a whole number.")
     .positive("Job ID must be greater than zero."),
@@ -39,6 +39,5 @@ export const createApplicationSchema = z.object({
     },
   ),
 });
-
-export type CreateApplicationInput =
+export type CreateApplicationInput = 
   z.infer<typeof createApplicationSchema>;

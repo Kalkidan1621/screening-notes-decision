@@ -1,109 +1,165 @@
 import {
+  createFileRoute,
+  Link,
+} from "@tanstack/react-router";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
   getScreeningDecision,
   saveScreeningDecision,
 } from "@/services/screening.service";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+
 import type {
   ScreeningDecision,
-  ScreeningDecisionResponse,
 } from "@/types/screening";
 
 import "@/styles/screening.css";
 
-export const Route = createFileRoute("/screening/$stageId")({
+export const Route = createFileRoute(
+  "/screening/$stageId",
+)({
   component: ScreeningPage,
 });
 
 function ScreeningPage() {
   const { stageId } = Route.useParams();
 
+  /*
+   * The route parameter is named stageId for now
+   * because that is the existing TanStack route name.
+   *
+   * The actual value is the application ID.
+   */
+  const applicationId = Number(stageId);
+
   const [decision, setDecision] =
-    useState<ScreeningDecisionResponse["data"]>(null);
+    useState<ScreeningDecision | "">("");
 
-  const [note, setNote] = useState("");
+  const [note, setNote] =
+    useState("");
 
-  const [decisionValue, setDecisionValue] =
-    useState<ScreeningDecision | null>(null);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [saving, setSaving] = useState(false);
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
 
   useEffect(() => {
-    async function fetchDecision() {
-      try {
-        const response = await getScreeningDecision(stageId);
+    loadDecision();
+  }, [applicationId]);
 
-        setDecision(response.data);
+  async function loadDecision() {
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
 
-        if (response.data) {
-          setNote(response.data.note ?? "");
-          setDecisionValue(response.data.decision);
-        }
-      } catch (error) {
-        console.error("Failed to fetch screening decision:", error);
-
-        alert(
-          error instanceof Error
-            ? error.message
-            : "Failed to load screening decision",
+      if (
+        !Number.isInteger(applicationId) ||
+        applicationId <= 0
+      ) {
+        throw new Error(
+          "Invalid application ID.",
         );
-      } finally {
-        setLoading(false);
       }
-    }
 
-    fetchDecision();
-  }, [stageId]);
+      const result =
+        await getScreeningDecision(
+          applicationId,
+        );
+
+      /*
+       * getScreeningDecision() returns
+       * ScreeningResult | null directly.
+       *
+       * Therefore we do NOT use result.data.
+       */
+      if (result) {
+        setDecision(result.decision);
+        setNote(result.note ?? "");
+      } else {
+        setDecision("");
+        setNote("");
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load screening decision:",
+        error,
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load screening decision.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSave() {
-    const trimmedNote = note.trim();
+    setError("");
+    setSuccess("");
 
-     if (!decisionValue) {
-    alert("Please select a screening decision.");
-    return;
-  }
-    if (!trimmedNote) {
-      alert("Please enter a screening note.");
+    if (
+      !Number.isInteger(applicationId) ||
+      applicationId <= 0
+    ) {
+      setError(
+        "Invalid application ID.",
+      );
       return;
     }
 
-    if (trimmedNote.length < 7) {
-  alert("Screening note must be at least 7 characters.");
-  return;
-}
+    if (!decision) {
+      setError(
+        "Please select a screening decision.",
+      );
+      return;
+    }
 
-if (/^\d+$/.test(trimmedNote)) {
-  alert("Screening note cannot contain numbers only.");
-  return;
-}
-
-    if (trimmedNote.length > 1000) {
-      alert("Screening note cannot exceed 1000 characters.");
+    if (!note.trim()) {
+      setError(
+        "Please enter a screening note.",
+      );
       return;
     }
 
     try {
       setSaving(true);
 
-      const result = await saveScreeningDecision(stageId, {
-        decision: decisionValue,
-        note: trimmedNote,
-      });
+      await saveScreeningDecision(
+        applicationId,
+        decision,
+        note.trim(),
+      );
 
-      setDecision(result.data);
-      setNote(result.data?.note ?? "");
+      setSuccess(
+        "Screening decision saved successfully.",
+      );
 
-      alert("Decision saved successfully.");
+      await loadDecision();
     } catch (error) {
-      console.error("Failed to save screening decision:", error);
+      console.error(
+        "Failed to save screening decision:",
+        error,
+      );
 
-      alert(
+      setError(
         error instanceof Error
           ? error.message
-          : "Failed to save screening decision",
-        );
+          : "Failed to save screening decision.",
+      );
     } finally {
       setSaving(false);
     }
@@ -111,189 +167,177 @@ if (/^\d+$/.test(trimmedNote)) {
 
   if (loading) {
     return (
-      <div className="screening-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading...</p>
-      </div>
+      <main className="screening-page">
+        <div className="screening-state">
+          Loading screening...
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="screening-page">
-      <div className="page-header">
-        <div>
-          <p className="page-label">CANDIDATE SCREENING</p>
+    <main className="screening-page">
+      <div className="screening-container">
 
-          <h1>Screening Decision</h1>
+        {/* BACK */}
 
-          <p className="page-description">
-            Review the candidate and record your screening decision.
+        <Link
+          to="/admin/applications"
+          className="screening-back-link"
+        >
+          ← Back to Applications
+        </Link>
+
+        {/* HEADER */}
+
+        <header className="screening-header">
+          <p className="screening-eyebrow">
+            CANDIDATE SCREENING
           </p>
-        </div>
 
-        <div className="header-status">
-          <span className="status-dot"></span>
-          Screening Active
-        </div>
-      </div>
+          <h1>
+            Screening Notes & Decision
+          </h1>
 
-      <div className="screening-layout">
-        <div className="decision-card">
-          <div className="card-header">
-            <div>
-              <h2>Current Decision</h2>
+          <p>
+            Review the candidate and record
+            your screening decision.
+          </p>
 
-              <p>Latest screening information</p>
-            </div>
+          <span className="screening-application-id">
+            Application #{applicationId}
+          </span>
+        </header>
 
-            <div className={`decision-badge ${decision?.decision || "empty"}`}>
-              {decision?.decision || "Not set"}
-            </div>
+        {/* ERROR */}
+
+        {error && (
+          <div
+            className="screening-error"
+            role="alert"
+          >
+            {error}
           </div>
+        )}
 
-          {decision ? (
-            <div className="decision-content">
-              <div className="info-row">
-                <span className="info-label">Decision</span>
+        {/* SUCCESS */}
 
-                <span className={`decision-text ${decision.decision}`}>
-                  {decision.decision}
-                </span>
-              </div>
-
-              <div className="info-row note-row">
-                <span className="info-label">Screening Note</span>
-
-                <p className="saved-note">
-                  {decision.note || "No note added"}
-                </p>
-              </div>
-
-              <div className="info-row">
-                <span className="info-label">Last Updated</span>
-
-                <span className="updated-time">
-                  {decision.updatedAt}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-icon">!</div>
-
-              <h3>No decision yet</h3>
-
-              <p>Add a screening decision using the form.</p>
-            </div>
-          )}
-        </div>
-
-        <div className="decision-card form-card">
-          <div className="card-header">
-            <div>
-              <h2>Update Decision</h2>
-
-              <p>Record your assessment of the candidate.</p>
-            </div>
+        {success && (
+          <div
+            className="screening-success"
+            role="status"
+          >
+            {success}
           </div>
+        )}
 
-          <div className="form-content">
-            <div className="form-group">
-              <label>Screening Decision</label>
+        {/* SCREENING FORM */}
 
-              <div className="decision-options">
-                <button
-                  type="button"
-                  className={`decision-option pass ${
-                    decisionValue === "pass" ? "selected" : ""
-                  }`}
-                  onClick={() => setDecisionValue("pass")}
-                >
-                  <span className="option-icon">✓</span>
+        <section className="screening-card">
 
-                  <span>
-                    <strong>Pass</strong>
-                    <small>Move candidate forward</small>
-                  </span>
-                </button>
+          {/* DECISION */}
 
-                <button
-                  type="button"
-                  className={`decision-option hold ${
-                    decisionValue === "hold" ? "selected" : ""
-                  }`}
-                  onClick={() => setDecisionValue("hold")}
-                >
-                  <span className="option-icon">⏸</span>
+          <div className="screening-field">
+            <label htmlFor="decision">
+              Decision
+            </label>
 
-                  <span>
-                    <strong>Hold</strong>
-                    <small>Review again later</small>
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`decision-option reject ${
-                    decisionValue === "reject" ? "selected" : ""
-                  }`}
-                  onClick={() => setDecisionValue("reject")}
-                >
-                  <span className="option-icon">×</span>
-
-                  <span>
-                    <strong>Reject</strong>
-                    <small>Do not move forward</small>
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="label-row">
-                <label htmlFor="screening-note">Screening Note</label>
-
-                <span className="character-count">
-                  {note.length}/1000
-                </span>
-              </div>
-
-              <textarea
-                id="screening-note"
-                rows={6}
-                maxLength={1000}
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Write your screening notes here..."
-              />
-
-              <p className="input-hint">
-                Add relevant observations about the candidate&apos;s skills,
-                experience, and suitability for the role.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="save-button"
+            <select
+              id="decision"
+              value={decision}
+              onChange={(event) =>
+                setDecision(
+                  event.target.value as
+                    | ScreeningDecision
+                    | "",
+                )
+              }
               disabled={saving}
-              onClick={handleSave}
             >
-              {saving ? (
-                <>
-                  <span className="button-spinner"></span>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  Save Decision
-                  <span className="button-arrow">→</span>
-                </>
-              )}
-            </button>
+              <option value="">
+                Select decision
+              </option>
+
+              <option value="pass">
+                Pass
+              </option>
+
+              <option value="hold">
+                Hold
+              </option>
+
+              <option value="reject">
+                Reject
+              </option>
+            </select>
           </div>
-        </div>
+
+          {/* NOTE */}
+
+          <div className="screening-field">
+            <label htmlFor="note">
+              Screening Note
+            </label>
+
+            <textarea
+              id="note"
+              value={note}
+              maxLength={1000}
+              onChange={(event) =>
+                setNote(
+                  event.target.value,
+                )
+              }
+              placeholder="Enter your screening notes..."
+              rows={7}
+              disabled={saving}
+            />
+
+            <small>
+              {note.length}/1000
+            </small>
+          </div>
+
+          {/* SAVE */}
+
+          <button
+            type="button"
+            className="screening-save-button"
+            disabled={saving}
+            onClick={handleSave}
+          >
+            {saving
+              ? "Saving..."
+              : "Save Decision"}
+          </button>
+
+        </section>
+
+        {/* SAVED DECISION */}
+
+        {decision && (
+          <section className="screening-saved-card">
+
+            <p className="screening-eyebrow">
+              SAVED DECISION
+            </p>
+
+            <h2>
+              {decision === "pass"
+                ? "Pass"
+                : decision === "hold"
+                  ? "Hold"
+                  : "Reject"}
+            </h2>
+
+            {note && (
+              <p>{note}</p>
+            )}
+
+          </section>
+        )}
+
       </div>
-    </div>
+    </main>
   );
 }

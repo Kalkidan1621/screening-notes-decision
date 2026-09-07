@@ -1,34 +1,190 @@
 import {
   integer,
+  boolean,
   pgTable,
   serial,
   varchar,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
-
-export const screeningDecisions = pgTable(
-  "screening_decisions",
+export const roles = pgTable(
+  "roles",
   {
     id: serial("id").primaryKey(),
 
-    stageId: varchar("stage_id", {
+    name: varchar("name", {
+      length: 50,
+    }).notNull().unique(),
+
+    description: varchar("description", {
       length: 255,
-    }).notNull(),
+    }),
 
-    decision: varchar("decision", {
-      length: 20,
-    }).notNull(),
-
-    note: text("note"),
-
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
   },
 );
 
+export const permissions = pgTable(
+  "permissions",
+  {
+    id: serial("id").primaryKey(),
+
+    name: varchar("name", {
+      length: 100,
+    }).notNull().unique(),
+
+    description: varchar("description", {
+      length: 255,
+    }),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
+
+export const rolePermissions = pgTable(
+  "role_permissions",
+  {
+    id: serial("id").primaryKey(),
+
+    roleId: integer("role_id")
+      .notNull()
+      .references(() => roles.id, {
+        onDelete: "cascade",
+      }),
+
+    permissionId: integer("permission_id")
+      .notNull()
+      .references(() => permissions.id, {
+        onDelete: "cascade",
+      }),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    uniqueRolePermission: unique(
+      "unique_role_permission",
+    ).on(
+      table.roleId,
+      table.permissionId,
+    ),
+  }),
+);
+
+export const users = pgTable(
+  "users",
+  {
+    id: serial("id").primaryKey(),
+
+    firstName: varchar("first_name", {
+      length: 100,
+    }).notNull(),
+
+    lastName: varchar("last_name", {
+      length: 100,
+    }).notNull(),
+
+    email: varchar("email", {
+      length: 255,
+    }).notNull().unique(),
+
+    passwordHash: text(
+      "password_hash",
+    ).notNull(),
+
+    roleId: integer("role_id")
+      .notNull()
+      .references(() => roles.id, {
+        onDelete: "restrict",
+      }),
+
+    profileImageUrl: text(
+      "profile_image_url",
+    ),
+
+    isActive: boolean("is_active")
+       .notNull()
+        .default(true),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
+
+export const employers = pgTable(
+  "employers",
+  {
+    id: serial("id").primaryKey(),
+
+    name: varchar("name", {
+      length: 255,
+    }).notNull(),
+
+    email: varchar("email", {
+      length: 255,
+    }).notNull().unique(),
+
+    phone: varchar("phone", {
+      length: 50,
+    }),
+
+    address: varchar("address", {
+      length: 255,
+    }),
+
+    description: text("description"),
+
+    logoUrl: text("logo_url"),
+
+    isActive: boolean("is_active")
+      .notNull()
+      .default(true),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: serial("id").primaryKey(),
+
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    token: text("token")
+      .notNull()
+      .unique(),
+
+    expiresAt: timestamp(
+      "expires_at",
+    ).notNull(),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
 
 export const jobs = pgTable(
   "jobs",
@@ -135,14 +291,21 @@ export const jobs = pgTable(
   },
 );
 
-
 export const applications = pgTable(
   "applications",
   {
     id: serial("id").primaryKey(),
 
-    jobId: integer("job_id")
-      .notNull(),
+    candidateId: integer("candidate_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+      jobId: integer("job_id")
+      .notNull()
+      .references(() => jobs.id, {
+        onDelete: "cascade",
+      }),
 
     fullName: varchar("full_name", {
       length: 255,
@@ -185,4 +348,141 @@ export const applications = pgTable(
         .notNull()
         .defaultNow(),
   },
+   (table) => ({
+    uniqueCandidateJob: unique(
+      "unique_candidate_job",
+    ).on(
+      table.candidateId,
+      table.jobId,
+    ),
+  }),
 );
+
+export const interviews = pgTable(
+  "interviews",
+  {
+    id: serial("id").primaryKey(),
+
+    applicationId: integer(
+      "application_id",
+    )
+      .notNull()
+      .references(
+        () => applications.id,
+        {
+          onDelete: "cascade",
+        },
+      ),
+
+    interviewerId: integer(
+      "interviewer_id",
+    )
+      .references(
+        () => users.id,
+        {
+          onDelete: "set null",
+        },
+      ),
+
+    interviewType: varchar(
+      "interview_type",
+      {
+        length: 50,
+      },
+    ).notNull(),
+
+    scheduledAt: timestamp(
+      "scheduled_at",
+    ).notNull(),
+
+    location: varchar(
+      "location",
+      {
+        length: 255,
+      },
+    ),
+
+    notes: text("notes"),
+
+    status: varchar(
+      "status",
+      {
+        length: 30,
+      },
+    )
+      .notNull()
+      .default("scheduled"),
+
+    createdAt: timestamp(
+      "created_at",
+    )
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp(
+      "updated_at",
+    )
+      .notNull()
+      .defaultNow(),
+  },
+);
+export const screeningDecisions = pgTable(
+  "screening_decisions",
+  {
+    id: serial("id").primaryKey(),
+
+    applicationId: integer(
+      "application_id",
+    )
+      .notNull()
+      .references(() => applications.id, {
+        onDelete: "cascade",
+      })
+      .unique(),
+
+    decision: varchar("decision", {
+      length: 20,
+    }).notNull(),
+
+    note: text("note"),
+
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
+export const hiringDecisions = pgTable(
+  "hiring_decisions",
+  {
+    id: serial("id").primaryKey(),
+
+    applicationId: integer(
+      "application_id",
+    )
+      .notNull()
+      .references(() => applications.id, {
+        onDelete: "cascade",
+      })
+      .unique(),
+
+    decision: varchar("decision", {
+      length: 20,
+    }).notNull(),
+
+    note: text("note"),
+
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow(),
+  },
+);
+
+
+
+
+
+
+
+
+
+

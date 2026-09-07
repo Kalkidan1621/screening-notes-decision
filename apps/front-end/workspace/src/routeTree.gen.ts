@@ -10,12 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
 import { Route as AdminScreeningRouteImport } from './routes/admin/screening'
+import { Route as CandidateApplicationsRouteImport } from './routes/candidate/applications'
+import { Route as CandidateLoginRouteImport } from './routes/candidate/login'
+import { Route as CandidateProfileRouteImport } from './routes/candidate/profile'
+import { Route as CandidateRegisterRouteImport } from './routes/candidate/register'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
+import { Route as ScreeningApplicationIdRouteImport } from './routes/screening/$applicationId'
 import { Route as ScreeningStageIdRouteImport } from './routes/screening.$stageId'
 import { Route as AdminApplicationsIndexRouteImport } from './routes/admin/applications/index'
 import { Route as AdminApplicationsApplicationIdRouteImport } from './routes/admin/applications/$applicationId'
+import { Route as AdminCandidatesIndexRouteImport } from './routes/admin/candidates/index'
+import { Route as AdminEmployersIndexRouteImport } from './routes/admin/employers/index'
+import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
+import { Route as AdminJobsJobIdRouteImport } from './routes/admin/jobs/$jobId'
 import { Route as AdminJobsCreateRouteImport } from './routes/admin/jobs/create'
+import { Route as AdminScreeningApplicationIdRouteImport } from './routes/admin/screening/$applicationId'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as JobsJobIdIndexRouteImport } from './routes/jobs/$jobId/index'
 import { Route as JobsJobIdApplyRouteImport } from './routes/jobs/$jobId/apply'
 
@@ -24,14 +39,59 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminScreeningRoute = AdminScreeningRouteImport.update({
-  id: '/admin/screening',
-  path: '/admin/screening',
+  id: '/screening',
+  path: '/screening',
+  getParentRoute: () => AdminRoute,
+} as any)
+const CandidateApplicationsRoute = CandidateApplicationsRouteImport.update({
+  id: '/candidate/applications',
+  path: '/candidate/applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidateLoginRoute = CandidateLoginRouteImport.update({
+  id: '/candidate/login',
+  path: '/candidate/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidateProfileRoute = CandidateProfileRouteImport.update({
+  id: '/candidate/profile',
+  path: '/candidate/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidateRegisterRoute = CandidateRegisterRouteImport.update({
+  id: '/candidate/register',
+  path: '/candidate/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsIndexRoute = JobsIndexRouteImport.update({
   id: '/jobs/',
   path: '/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScreeningApplicationIdRoute = ScreeningApplicationIdRouteImport.update({
+  id: '/screening/$applicationId',
+  path: '/screening/$applicationId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScreeningStageIdRoute = ScreeningStageIdRouteImport.update({
@@ -40,20 +100,51 @@ const ScreeningStageIdRoute = ScreeningStageIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminApplicationsIndexRoute = AdminApplicationsIndexRouteImport.update({
-  id: '/admin/applications/',
-  path: '/admin/applications/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminApplicationsRoute,
 } as any)
 const AdminApplicationsApplicationIdRoute =
   AdminApplicationsApplicationIdRouteImport.update({
-    id: '/admin/applications/$applicationId',
-    path: '/admin/applications/$applicationId',
-    getParentRoute: () => rootRouteImport,
+    id: '/$applicationId',
+    path: '/$applicationId',
+    getParentRoute: () => AdminApplicationsRoute,
   } as any)
+const AdminCandidatesIndexRoute = AdminCandidatesIndexRouteImport.update({
+  id: '/candidates/',
+  path: '/candidates/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEmployersIndexRoute = AdminEmployersIndexRouteImport.update({
+  id: '/employers/',
+  path: '/employers/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
+  id: '/jobs/',
+  path: '/jobs/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJobsJobIdRoute = AdminJobsJobIdRouteImport.update({
+  id: '/jobs/$jobId',
+  path: '/jobs/$jobId',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminJobsCreateRoute = AdminJobsCreateRouteImport.update({
-  id: '/admin/jobs/create',
-  path: '/admin/jobs/create',
-  getParentRoute: () => rootRouteImport,
+  id: '/jobs/create',
+  path: '/jobs/create',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminScreeningApplicationIdRoute =
+  AdminScreeningApplicationIdRouteImport.update({
+    id: '/$applicationId',
+    path: '/$applicationId',
+    getParentRoute: () => AdminScreeningRoute,
+  } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const JobsJobIdIndexRoute = JobsJobIdIndexRouteImport.update({
   id: '/jobs/$jobId/',
@@ -68,83 +159,172 @@ const JobsJobIdApplyRoute = JobsJobIdApplyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin/screening': typeof AdminScreeningRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/login': typeof LoginRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/screening': typeof AdminScreeningRouteWithChildren
+  '/candidate/applications': typeof CandidateApplicationsRoute
+  '/candidate/login': typeof CandidateLoginRoute
+  '/candidate/profile': typeof CandidateProfileRoute
+  '/candidate/register': typeof CandidateRegisterRoute
+  '/screening/$applicationId': typeof ScreeningApplicationIdRoute
   '/screening/$stageId': typeof ScreeningStageIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/jobs/': typeof JobsIndexRoute
   '/admin/applications/$applicationId': typeof AdminApplicationsApplicationIdRoute
+  '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/jobs/create': typeof AdminJobsCreateRoute
+  '/admin/screening/$applicationId': typeof AdminScreeningApplicationIdRoute
   '/jobs/$jobId/apply': typeof JobsJobIdApplyRoute
   '/admin/applications/': typeof AdminApplicationsIndexRoute
+  '/admin/candidates/': typeof AdminCandidatesIndexRoute
+  '/admin/employers/': typeof AdminEmployersIndexRoute
+  '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/jobs/$jobId/': typeof JobsJobIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin/screening': typeof AdminScreeningRoute
+  '/login': typeof LoginRoute
+  '/admin/screening': typeof AdminScreeningRouteWithChildren
+  '/candidate/applications': typeof CandidateApplicationsRoute
+  '/candidate/login': typeof CandidateLoginRoute
+  '/candidate/profile': typeof CandidateProfileRoute
+  '/candidate/register': typeof CandidateRegisterRoute
+  '/screening/$applicationId': typeof ScreeningApplicationIdRoute
   '/screening/$stageId': typeof ScreeningStageIdRoute
+  '/admin': typeof AdminIndexRoute
   '/jobs': typeof JobsIndexRoute
   '/admin/applications/$applicationId': typeof AdminApplicationsApplicationIdRoute
+  '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/jobs/create': typeof AdminJobsCreateRoute
+  '/admin/screening/$applicationId': typeof AdminScreeningApplicationIdRoute
   '/jobs/$jobId/apply': typeof JobsJobIdApplyRoute
   '/admin/applications': typeof AdminApplicationsIndexRoute
+  '/admin/candidates': typeof AdminCandidatesIndexRoute
+  '/admin/employers': typeof AdminEmployersIndexRoute
+  '/admin/jobs': typeof AdminJobsIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
   '/jobs/$jobId': typeof JobsJobIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin/screening': typeof AdminScreeningRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/login': typeof LoginRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/screening': typeof AdminScreeningRouteWithChildren
+  '/candidate/applications': typeof CandidateApplicationsRoute
+  '/candidate/login': typeof CandidateLoginRoute
+  '/candidate/profile': typeof CandidateProfileRoute
+  '/candidate/register': typeof CandidateRegisterRoute
+  '/screening/$applicationId': typeof ScreeningApplicationIdRoute
   '/screening/$stageId': typeof ScreeningStageIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/jobs/': typeof JobsIndexRoute
   '/admin/applications/$applicationId': typeof AdminApplicationsApplicationIdRoute
+  '/admin/jobs/$jobId': typeof AdminJobsJobIdRoute
   '/admin/jobs/create': typeof AdminJobsCreateRoute
+  '/admin/screening/$applicationId': typeof AdminScreeningApplicationIdRoute
   '/jobs/$jobId/apply': typeof JobsJobIdApplyRoute
   '/admin/applications/': typeof AdminApplicationsIndexRoute
+  '/admin/candidates/': typeof AdminCandidatesIndexRoute
+  '/admin/employers/': typeof AdminEmployersIndexRoute
+  '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/jobs/$jobId/': typeof JobsJobIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/login'
+    | '/admin/applications'
     | '/admin/screening'
+    | '/candidate/applications'
+    | '/candidate/login'
+    | '/candidate/profile'
+    | '/candidate/register'
+    | '/screening/$applicationId'
     | '/screening/$stageId'
+    | '/admin/'
     | '/jobs/'
     | '/admin/applications/$applicationId'
+    | '/admin/jobs/$jobId'
     | '/admin/jobs/create'
+    | '/admin/screening/$applicationId'
     | '/jobs/$jobId/apply'
     | '/admin/applications/'
+    | '/admin/candidates/'
+    | '/admin/employers/'
+    | '/admin/jobs/'
+    | '/admin/users/'
     | '/jobs/$jobId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/admin/screening'
+    | '/candidate/applications'
+    | '/candidate/login'
+    | '/candidate/profile'
+    | '/candidate/register'
+    | '/screening/$applicationId'
     | '/screening/$stageId'
+    | '/admin'
     | '/jobs'
     | '/admin/applications/$applicationId'
+    | '/admin/jobs/$jobId'
     | '/admin/jobs/create'
+    | '/admin/screening/$applicationId'
     | '/jobs/$jobId/apply'
     | '/admin/applications'
+    | '/admin/candidates'
+    | '/admin/employers'
+    | '/admin/jobs'
+    | '/admin/users'
     | '/jobs/$jobId'
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/login'
+    | '/admin/applications'
     | '/admin/screening'
+    | '/candidate/applications'
+    | '/candidate/login'
+    | '/candidate/profile'
+    | '/candidate/register'
+    | '/screening/$applicationId'
     | '/screening/$stageId'
+    | '/admin/'
     | '/jobs/'
     | '/admin/applications/$applicationId'
+    | '/admin/jobs/$jobId'
     | '/admin/jobs/create'
+    | '/admin/screening/$applicationId'
     | '/jobs/$jobId/apply'
     | '/admin/applications/'
+    | '/admin/candidates/'
+    | '/admin/employers/'
+    | '/admin/jobs/'
+    | '/admin/users/'
     | '/jobs/$jobId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminScreeningRoute: typeof AdminScreeningRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  CandidateApplicationsRoute: typeof CandidateApplicationsRoute
+  CandidateLoginRoute: typeof CandidateLoginRoute
+  CandidateProfileRoute: typeof CandidateProfileRoute
+  CandidateRegisterRoute: typeof CandidateRegisterRoute
+  ScreeningApplicationIdRoute: typeof ScreeningApplicationIdRoute
   ScreeningStageIdRoute: typeof ScreeningStageIdRoute
   JobsIndexRoute: typeof JobsIndexRoute
-  AdminApplicationsApplicationIdRoute: typeof AdminApplicationsApplicationIdRoute
-  AdminJobsCreateRoute: typeof AdminJobsCreateRoute
   JobsJobIdApplyRoute: typeof JobsJobIdApplyRoute
-  AdminApplicationsIndexRoute: typeof AdminApplicationsIndexRoute
   JobsJobIdIndexRoute: typeof JobsJobIdIndexRoute
 }
 
@@ -157,11 +337,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/screening': {
       id: '/admin/screening'
-      path: '/admin/screening'
+      path: '/screening'
       fullPath: '/admin/screening'
       preLoaderRoute: typeof AdminScreeningRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/candidate/applications': {
+      id: '/candidate/applications'
+      path: '/candidate/applications'
+      fullPath: '/candidate/applications'
+      preLoaderRoute: typeof CandidateApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidate/login': {
+      id: '/candidate/login'
+      path: '/candidate/login'
+      fullPath: '/candidate/login'
+      preLoaderRoute: typeof CandidateLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidate/profile': {
+      id: '/candidate/profile'
+      path: '/candidate/profile'
+      fullPath: '/candidate/profile'
+      preLoaderRoute: typeof CandidateProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidate/register': {
+      id: '/candidate/register'
+      path: '/candidate/register'
+      fullPath: '/candidate/register'
+      preLoaderRoute: typeof CandidateRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs/': {
@@ -169,6 +405,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs/'
       preLoaderRoute: typeof JobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/screening/$applicationId': {
+      id: '/screening/$applicationId'
+      path: '/screening/$applicationId'
+      fullPath: '/screening/$applicationId'
+      preLoaderRoute: typeof ScreeningApplicationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/screening/$stageId': {
@@ -180,24 +423,66 @@ declare module '@tanstack/react-router' {
     }
     '/admin/applications/': {
       id: '/admin/applications/'
-      path: '/admin/applications'
+      path: '/'
       fullPath: '/admin/applications/'
       preLoaderRoute: typeof AdminApplicationsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminApplicationsRoute
     }
     '/admin/applications/$applicationId': {
       id: '/admin/applications/$applicationId'
-      path: '/admin/applications/$applicationId'
+      path: '/$applicationId'
       fullPath: '/admin/applications/$applicationId'
       preLoaderRoute: typeof AdminApplicationsApplicationIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminApplicationsRoute
+    }
+    '/admin/candidates/': {
+      id: '/admin/candidates/'
+      path: '/candidates'
+      fullPath: '/admin/candidates/'
+      preLoaderRoute: typeof AdminCandidatesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/employers/': {
+      id: '/admin/employers/'
+      path: '/employers'
+      fullPath: '/admin/employers/'
+      preLoaderRoute: typeof AdminEmployersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/jobs/': {
+      id: '/admin/jobs/'
+      path: '/jobs'
+      fullPath: '/admin/jobs/'
+      preLoaderRoute: typeof AdminJobsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/jobs/$jobId': {
+      id: '/admin/jobs/$jobId'
+      path: '/jobs/$jobId'
+      fullPath: '/admin/jobs/$jobId'
+      preLoaderRoute: typeof AdminJobsJobIdRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/jobs/create': {
       id: '/admin/jobs/create'
-      path: '/admin/jobs/create'
+      path: '/jobs/create'
       fullPath: '/admin/jobs/create'
       preLoaderRoute: typeof AdminJobsCreateRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/screening/$applicationId': {
+      id: '/admin/screening/$applicationId'
+      path: '/$applicationId'
+      fullPath: '/admin/screening/$applicationId'
+      preLoaderRoute: typeof AdminScreeningApplicationIdRouteImport
+      parentRoute: typeof AdminScreeningRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/jobs/$jobId/': {
       id: '/jobs/$jobId/'
@@ -216,15 +501,69 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminApplicationsRouteChildren {
+  AdminApplicationsApplicationIdRoute: typeof AdminApplicationsApplicationIdRoute
+  AdminApplicationsIndexRoute: typeof AdminApplicationsIndexRoute
+}
+
+const AdminApplicationsRouteChildren: AdminApplicationsRouteChildren = {
+  AdminApplicationsApplicationIdRoute: AdminApplicationsApplicationIdRoute,
+  AdminApplicationsIndexRoute: AdminApplicationsIndexRoute,
+}
+
+const AdminApplicationsRouteWithChildren =
+  AdminApplicationsRoute._addFileChildren(AdminApplicationsRouteChildren)
+
+interface AdminScreeningRouteChildren {
+  AdminScreeningApplicationIdRoute: typeof AdminScreeningApplicationIdRoute
+}
+
+const AdminScreeningRouteChildren: AdminScreeningRouteChildren = {
+  AdminScreeningApplicationIdRoute: AdminScreeningApplicationIdRoute,
+}
+
+const AdminScreeningRouteWithChildren = AdminScreeningRoute._addFileChildren(
+  AdminScreeningRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminApplicationsRoute: typeof AdminApplicationsRouteWithChildren
+  AdminScreeningRoute: typeof AdminScreeningRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminJobsJobIdRoute: typeof AdminJobsJobIdRoute
+  AdminJobsCreateRoute: typeof AdminJobsCreateRoute
+  AdminCandidatesIndexRoute: typeof AdminCandidatesIndexRoute
+  AdminEmployersIndexRoute: typeof AdminEmployersIndexRoute
+  AdminJobsIndexRoute: typeof AdminJobsIndexRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminApplicationsRoute: AdminApplicationsRouteWithChildren,
+  AdminScreeningRoute: AdminScreeningRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminJobsJobIdRoute: AdminJobsJobIdRoute,
+  AdminJobsCreateRoute: AdminJobsCreateRoute,
+  AdminCandidatesIndexRoute: AdminCandidatesIndexRoute,
+  AdminEmployersIndexRoute: AdminEmployersIndexRoute,
+  AdminJobsIndexRoute: AdminJobsIndexRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminScreeningRoute: AdminScreeningRoute,
+  AdminRoute: AdminRouteWithChildren,
+  LoginRoute: LoginRoute,
+  CandidateApplicationsRoute: CandidateApplicationsRoute,
+  CandidateLoginRoute: CandidateLoginRoute,
+  CandidateProfileRoute: CandidateProfileRoute,
+  CandidateRegisterRoute: CandidateRegisterRoute,
+  ScreeningApplicationIdRoute: ScreeningApplicationIdRoute,
   ScreeningStageIdRoute: ScreeningStageIdRoute,
   JobsIndexRoute: JobsIndexRoute,
-  AdminApplicationsApplicationIdRoute: AdminApplicationsApplicationIdRoute,
-  AdminJobsCreateRoute: AdminJobsCreateRoute,
   JobsJobIdApplyRoute: JobsJobIdApplyRoute,
-  AdminApplicationsIndexRoute: AdminApplicationsIndexRoute,
   JobsJobIdIndexRoute: JobsJobIdIndexRoute,
 }
 export const routeTree = rootRouteImport

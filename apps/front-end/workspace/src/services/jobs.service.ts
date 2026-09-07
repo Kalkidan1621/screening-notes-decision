@@ -43,6 +43,10 @@ export async function getJobs():
   const response =
     await fetch(
       `${API_URL}/jobs`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
     );
 
   if (!response.ok) {
@@ -81,6 +85,10 @@ export async function getJobById(
   const response =
     await fetch(
       `${API_URL}/jobs/${jobId}`,
+      {
+       method: "GET",
+       credentials: "include",
+      }
     );
 
   if (!response.ok) {
@@ -124,7 +132,8 @@ export async function createJob(
       {
         method:
           "POST",
-
+        credentials:"include",
+        
         headers: {
           "Content-Type":
             "application/json",

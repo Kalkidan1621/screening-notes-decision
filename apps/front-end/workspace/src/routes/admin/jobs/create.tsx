@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import {
+  useEffect,
   useState,
   type FormEvent,
 } from "react";
@@ -8,8 +10,15 @@ import {
   createJob,
 } from "@/services/jobs.service";
 
-import "@/styles/admin-jobs.css";
+import {
+  getAllEmployers,
+} from "@/services/employer.service";
 
+import type {
+  Employer,
+} from "@/services/employer.service";
+
+import "@/styles/admin-jobs.css";
 
 export const Route = createFileRoute(
   "/admin/jobs/create",
@@ -33,6 +42,15 @@ function CreateJobPage() {
     useState("");
 
   const [employer, setEmployer] =
+    useState("");
+
+  const [employers, setEmployers] =
+    useState<Employer[]>([]);
+
+  const [employersLoading, setEmployersLoading] =
+    useState(true);
+
+  const [employersError, setEmployersError] =
     useState("");
 
   const [
@@ -93,8 +111,8 @@ function CreateJobPage() {
   ] = useState<Priority>(
     "medium",
   );
-  // Validation errors
 
+  // Validation errors
   const [
     titleError,
     setTitleError,
@@ -149,8 +167,8 @@ function CreateJobPage() {
     salaryError,
     setSalaryError,
   ] = useState("");
-  // Submit states
 
+  // Submit states
   const [
     success,
     setSuccess,
@@ -166,6 +184,44 @@ function CreateJobPage() {
     setIsSubmitting,
   ] = useState(false);
 
+  /*
+   * Load employers from database
+   */
+  useEffect(() => {
+    async function loadEmployers() {
+      try {
+        setEmployersLoading(true);
+        setEmployersError("");
+
+        const response =
+          await getAllEmployers();
+
+        const activeEmployers =
+          response.data.filter(
+            (item) => item.isActive,
+          );
+
+        setEmployers(
+          activeEmployers,
+        );
+      } catch (error) {
+        console.error(
+          "Failed to load employers:",
+          error,
+        );
+
+        setEmployersError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load employers.",
+        );
+      } finally {
+        setEmployersLoading(false);
+      }
+    }
+
+    loadEmployers();
+  }, []);
 
   function validateTitle(
     value: string,
@@ -174,14 +230,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setTitleError("");
-
     } else if (
       value.trim().length < 3
     ) {
       setTitleError(
         "Job title must be at least 3 characters.",
       );
-
     } else {
       setTitleError("");
     }
@@ -190,21 +244,12 @@ function CreateJobPage() {
   function validateEmployer(
     value: string,
   ) {
-    if (
-      value.trim().length === 0
-    ) {
+    if (!value) {
       setEmployerError("");
-
-    } else if (
-      value.trim().length < 2
-    ) {
-      setEmployerError(
-        "Employer must be at least 2 characters.",
-      );
-
-    } else {
-      setEmployerError("");
+      return;
     }
+
+    setEmployerError("");
   }
 
   function validateDepartment(
@@ -214,14 +259,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setDepartmentError("");
-
     } else if (
       value.trim().length < 2
     ) {
       setDepartmentError(
         "Department must be at least 2 characters.",
       );
-
     } else {
       setDepartmentError("");
     }
@@ -234,14 +277,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setDescriptionError("");
-
     } else if (
       value.trim().length < 20
     ) {
       setDescriptionError(
         "Job description must be at least 20 characters.",
       );
-
     } else {
       setDescriptionError("");
     }
@@ -254,14 +295,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setLocationError("");
-
     } else if (
       value.trim().length < 2
     ) {
       setLocationError(
         "Location must be at least 2 characters.",
       );
-
     } else {
       setLocationError("");
     }
@@ -274,7 +313,6 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setExperienceError("");
-
     } else {
       setExperienceError("");
     }
@@ -287,14 +325,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setEducationalQualificationError("");
-
     } else if (
       value.trim().length < 2
     ) {
       setEducationalQualificationError(
         "Educational qualification must be at least 2 characters.",
       );
-
     } else {
       setEducationalQualificationError("");
     }
@@ -307,14 +343,12 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setWorkingTimeError("");
-
     } else if (
       value.trim().length < 2
     ) {
       setWorkingTimeError(
         "Working time must be at least 2 characters.",
       );
-
     } else {
       setWorkingTimeError("");
     }
@@ -323,11 +357,8 @@ function CreateJobPage() {
   function validateOpeningDate(
     value: string,
   ) {
-    if (
-      value.length === 0
-    ) {
+    if (value.length === 0) {
       setOpeningDateError("");
-
     } else {
       setOpeningDateError("");
     }
@@ -336,11 +367,8 @@ function CreateJobPage() {
   function validateClosingDate(
     value: string,
   ) {
-    if (
-      value.length === 0
-    ) {
+    if (value.length === 0) {
       setClosingDateError("");
-
     } else {
       setClosingDateError("");
     }
@@ -353,15 +381,13 @@ function CreateJobPage() {
       value.trim().length === 0
     ) {
       setSalaryError("");
-
     } else {
       setSalaryError("");
     }
   }
 
   async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
+    event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
@@ -380,11 +406,9 @@ function CreateJobPage() {
       hasError = true;
     }
 
-    if (
-      employer.trim().length < 2
-    ) {
+    if (!employer) {
       setEmployerError(
-        "Employer must be at least 2 characters.",
+        "Please select an employer.",
       );
 
       hasError = true;
@@ -471,6 +495,7 @@ function CreateJobPage() {
 
       hasError = true;
     }
+
     if (
       openingDate &&
       closingDate &&
@@ -482,6 +507,7 @@ function CreateJobPage() {
 
       hasError = true;
     }
+
     if (
       salary.trim().length === 0
     ) {
@@ -491,18 +517,18 @@ function CreateJobPage() {
 
       hasError = true;
     }
+
     if (hasError) {
       return;
     }
+
     try {
       setIsSubmitting(true);
 
       await createJob({
-        title:
-          title.trim(),
+        title: title.trim(),
 
-        employer:
-          employer.trim(),
+        employer: employer.trim(),
 
         department:
           department.trim(),
@@ -533,34 +559,24 @@ function CreateJobPage() {
 
         priority,
 
-        status:
-          "active",
+        status: "active",
       });
+
       setSuccess(
         "Job created successfully!",
       );
+
       // Clear the form
-
       setTitle("");
-
       setEmployer("");
-
       setDepartment("");
-
       setDescription("");
-
       setLocation("");
-
       setExperience("");
-
       setEducationalQualification("");
-
       setWorkingTime("");
-
       setOpeningDate("");
-
       setClosingDate("");
-
       setSalary("");
 
       setEmploymentType(
@@ -570,7 +586,6 @@ function CreateJobPage() {
       setPriority(
         "medium",
       );
-
     } catch (error) {
       console.error(
         "Failed to create job:",
@@ -582,7 +597,6 @@ function CreateJobPage() {
           ? error.message
           : "Failed to create job.",
       );
-
     } finally {
       setIsSubmitting(false);
     }
@@ -590,14 +604,10 @@ function CreateJobPage() {
 
   return (
     <main className="admin-jobs-page">
-
       <div className="admin-jobs-container">
-
-        <section className="admin-job-form-card">
-
-          <header className="admin-job-header">
-
-            <p className="admin-job-eyebrow">
+        <section className="admin-jobs-form-card">
+          <header className="admin-jobs-header">
+            <p className="admin-jobs-eyebrow">
               ADMIN DASHBOARD
             </p>
 
@@ -609,16 +619,13 @@ function CreateJobPage() {
               Add a new job opening for
               candidates to view and apply.
             </p>
-
           </header>
 
           <form
             onSubmit={handleSubmit}
             noValidate
           >
-
-            <div className="admin-job-field">
-
+            <div className="admin-jobs-field">
               <label htmlFor="title">
                 Job Title
               </label>
@@ -633,14 +640,12 @@ function CreateJobPage() {
 
                   setTitle(value);
 
-                  validateTitle(
-                    value,
-                  );
+                  validateTitle(value);
                 }}
                 placeholder="Example: Frontend Developer"
-                aria-invalid={
-                  Boolean(titleError)
-                }
+                aria-invalid={Boolean(
+                  titleError,
+                )}
               />
 
               {titleError && (
@@ -651,18 +656,16 @@ function CreateJobPage() {
                   {titleError}
                 </p>
               )}
-
             </div>
 
+            {/* Employer from database */}
             <div className="admin-job-field">
-
               <label htmlFor="employer">
                 Employer
               </label>
 
-              <input
+              <select
                 id="employer"
-                type="text"
                 value={employer}
                 onChange={(event) => {
                   const value =
@@ -670,15 +673,52 @@ function CreateJobPage() {
 
                   setEmployer(value);
 
-                  validateEmployer(
-                    value,
-                  );
+                  validateEmployer(value);
                 }}
-                placeholder="Example: ABC Company"
-                aria-invalid={
-                  Boolean(employerError)
-                }
-              />
+                disabled={employersLoading}
+                aria-invalid={Boolean(
+                  employerError,
+                )}
+              >
+                <option value="">
+                  {employersLoading
+                    ? "Loading employers..."
+                    : "Select employer"}
+                </option>
+
+                {employers.map(
+                  (item) => (
+                    <option
+                      key={item.id}
+                      value={item.name}
+                    >
+                      {item.name}
+                    </option>
+                  ),
+                )}
+              </select>
+
+              {employersError && (
+                <p
+                  className="admin-field-error"
+                  role="alert"
+                >
+                  {employersError}
+                </p>
+              )}
+
+              {!employersLoading &&
+                !employersError &&
+                employers.length === 0 && (
+                  <p
+                    className="admin-field-error"
+                    role="alert"
+                  >
+                    No active employers
+                    found. Please create
+                    an employer first.
+                  </p>
+                )}
 
               {employerError && (
                 <p
@@ -688,11 +728,9 @@ function CreateJobPage() {
                   {employerError}
                 </p>
               )}
-
             </div>
 
             <div className="admin-job-field">
-
               <label htmlFor="department">
                 Department
               </label>
@@ -712,11 +750,9 @@ function CreateJobPage() {
                   );
                 }}
                 placeholder="Example: Engineering"
-                aria-invalid={
-                  Boolean(
-                    departmentError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  departmentError,
+                )}
               />
 
               {departmentError && (
@@ -727,12 +763,9 @@ function CreateJobPage() {
                   {departmentError}
                 </p>
               )}
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="location">
                 Job Location
               </label>
@@ -752,9 +785,9 @@ function CreateJobPage() {
                   );
                 }}
                 placeholder="Example: Addis Ababa"
-                aria-invalid={
-                  Boolean(locationError)
-                }
+                aria-invalid={Boolean(
+                  locationError,
+                )}
               />
 
               {locationError && (
@@ -765,11 +798,9 @@ function CreateJobPage() {
                   {locationError}
                 </p>
               )}
-
             </div>
 
             <div className="admin-job-field">
-
               <label htmlFor="experience">
                 Experience
               </label>
@@ -789,11 +820,9 @@ function CreateJobPage() {
                   );
                 }}
                 placeholder="Example: 2 years"
-                aria-invalid={
-                  Boolean(
-                    experienceError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  experienceError,
+                )}
               />
 
               {experienceError && (
@@ -804,12 +833,9 @@ function CreateJobPage() {
                   {experienceError}
                 </p>
               )}
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="educationalQualification">
                 Educational Qualification
               </label>
@@ -833,12 +859,11 @@ function CreateJobPage() {
                   );
                 }}
                 placeholder="Example: Bachelor's Degree"
-                aria-invalid={
-                  Boolean(
-                    educationalQualificationError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  educationalQualificationError,
+                )}
               />
+
               {educationalQualificationError && (
                 <p
                   className="admin-field-error"
@@ -849,11 +874,9 @@ function CreateJobPage() {
                   }
                 </p>
               )}
-
             </div>
 
             <div className="admin-job-field">
-
               <label htmlFor="employmentType">
                 Job Type
               </label>
@@ -883,12 +906,10 @@ function CreateJobPage() {
                 <option value="internship">
                   Internship
                 </option>
-
               </select>
-
             </div>
-            <div className="admin-job-field">
 
+            <div className="admin-job-field">
               <label htmlFor="workingTime">
                 Working Time
               </label>
@@ -908,11 +929,9 @@ function CreateJobPage() {
                   );
                 }}
                 placeholder="Example: Monday to Friday, 8:00 AM - 5:00 PM"
-                aria-invalid={
-                  Boolean(
-                    workingTimeError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  workingTimeError,
+                )}
               />
 
               {workingTimeError && (
@@ -923,11 +942,9 @@ function CreateJobPage() {
                   {workingTimeError}
                 </p>
               )}
-
             </div>
 
             <div className="admin-job-field">
-
               <label htmlFor="openingDate">
                 Opening Date
               </label>
@@ -946,11 +963,9 @@ function CreateJobPage() {
                     value,
                   );
                 }}
-                aria-invalid={
-                  Boolean(
-                    openingDateError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  openingDateError,
+                )}
               />
 
               {openingDateError && (
@@ -961,12 +976,9 @@ function CreateJobPage() {
                   {openingDateError}
                 </p>
               )}
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="closingDate">
                 Closing Date
               </label>
@@ -985,11 +997,9 @@ function CreateJobPage() {
                     value,
                   );
                 }}
-                aria-invalid={
-                  Boolean(
-                    closingDateError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  closingDateError,
+                )}
               />
 
               {closingDateError && (
@@ -1000,12 +1010,9 @@ function CreateJobPage() {
                   {closingDateError}
                 </p>
               )}
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="salary">
                 Salary
               </label>
@@ -1020,14 +1027,12 @@ function CreateJobPage() {
 
                   setSalary(value);
 
-                  validateSalary(
-                    value,
-                  );
+                  validateSalary(value);
                 }}
                 placeholder="Example: 20,000 ETB"
-                aria-invalid={
-                  Boolean(salaryError)
-                }
+                aria-invalid={Boolean(
+                  salaryError,
+                )}
               />
 
               {salaryError && (
@@ -1038,12 +1043,9 @@ function CreateJobPage() {
                   {salaryError}
                 </p>
               )}
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="priority">
                 Priority
               </label>
@@ -1058,7 +1060,6 @@ function CreateJobPage() {
                   )
                 }
               >
-
                 <option value="low">
                   Low
                 </option>
@@ -1070,14 +1071,10 @@ function CreateJobPage() {
                 <option value="high">
                   High
                 </option>
-
               </select>
-
             </div>
 
-
             <div className="admin-job-field">
-
               <label htmlFor="description">
                 Job Description
               </label>
@@ -1089,9 +1086,7 @@ function CreateJobPage() {
                   const value =
                     event.target.value;
 
-                  setDescription(
-                    value,
-                  );
+                  setDescription(value);
 
                   validateDescription(
                     value,
@@ -1099,11 +1094,9 @@ function CreateJobPage() {
                 }}
                 placeholder="Describe the responsibilities, requirements, and other job information..."
                 rows={7}
-                aria-invalid={
-                  Boolean(
-                    descriptionError,
-                  )
-                }
+                aria-invalid={Boolean(
+                  descriptionError,
+                )}
               />
 
               {descriptionError && (
@@ -1114,35 +1107,24 @@ function CreateJobPage() {
                   {descriptionError}
                 </p>
               )}
-
             </div>
 
-
             {success && (
-
               <p
                 className="admin-job-success"
                 role="status"
               >
-
                 {success}
-
               </p>
-
             )}
 
-
             {submitError && (
-
               <p
                 className="admin-job-error"
                 role="alert"
               >
-
                 {submitError}
-
               </p>
-
             )}
 
             <button
@@ -1150,19 +1132,13 @@ function CreateJobPage() {
               className="create-job-button"
               disabled={isSubmitting}
             >
-
               {isSubmitting
                 ? "Creating Job..."
                 : "Create Job"}
-
             </button>
-
           </form>
-
         </section>
-
       </div>
-
     </main>
   );
 }

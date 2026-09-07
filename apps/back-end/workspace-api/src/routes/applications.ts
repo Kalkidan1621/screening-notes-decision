@@ -1,113 +1,183 @@
 import { Hono } from "hono";
 
-import { createApplicationSchema } from "../schemas/applications.js";
+import {
+  createApplicationSchema,
+} from "../schemas/applications.js";
 
 import {
   createApplication,
   getAllApplications,
+   getApplicationsByCandidateId,
   getApplicationsByJobId,
   getApplicationById,
   getApplicationStats,
   updateApplicationStatus,
 } from "../services/applications.js";
 
+import {
+  requireAuth,
+  requirePermission,
+  requireRole,
+} from "../modules/auth/auth.middleware.js";
+
 const applicationsRouter = new Hono();
 
-// Admin gets all applications
-applicationsRouter.get("/", async (c) => {
-  const applications = await getAllApplications();
+// ================================
+// GET ALL APPLICATIONS
+// Recruiter / Hiring Manager / Admin
+// ================================
 
-  return c.json({
-    data: applications,
-  });
-});
+applicationsRouter.get(
+  "/",
+  requireAuth,
+  requirePermission(
+    "applications.read",
+  ),
+  async (c) => {
+    const applications =
+      await getAllApplications();
 
-// Candidate submits application
-applicationsRouter.post("/", async (c) => {
-  const body = await c.req.parseBody();
-
-  const resume = body.resume;
-
-  const data = {
-    jobId: Number(body.jobId),
-    fullName: String(body.fullName ?? ""),
-    email: String(body.email ?? ""),
-    phone: String(body.phone ?? ""),
-    resume,
-  };
-
-  const result =
-    createApplicationSchema.safeParse(data);
-
-  if (!result.success) {
-    return c.json(
-      {
-        message: "Validation failed.",
-        errors: result.error.flatten(),
-      },
-      400,
-    );
-  }
-
-  const application =
-    await createApplication(result.data);
-
-  return c.json(
-    {
-      message:
-        "Application submitted successfully.",
-      data: application,
-    },
-    201,
-  );
-},
+    return c.json({
+      success: true,
+      data: applications,
+    });
+  },
 );
 
-// Get application statistics
-applicationsRouter.get("/stats", async (c) => {
-  const stats =
-    await getApplicationStats();
+// ================================
+// GET MY APPLICATIONS
+// Candidate only
+// ================================
 
-  return c.json({
-    data: stats,
-  });
-});
+applicationsRouter.get(
+  "/candidate/me",
+  requireAuth,
+  requireRole("CANDIDATE"),
+  async (c) => {
+    const user = c.get("user");
 
-// Get application by ID
-applicationsRouter.get("/:id", async (c) => {
-  const id = Number(c.req.param("id"));
+    const applications =
+      await getApplicationsByCandidateId(
+        user.id,
+      );
 
-  if (!Number.isInteger(id) || id <= 0) {
+    return c.json({
+      success: true,
+      data: applications,
+    });
+  },
+);
+// ================================
+// CREATE APPLICATION
+// Candidate
+// Public
+// ================================
+
+applicationsRouter.post(
+  "/",
+   requireAuth,
+  requireRole("CANDIDATE"),
+  async (c) => {
+    const user = c.get("user");
+    
+    const body =
+      await c.req.parseBody();
+
+    const resume =
+      body.resume;
+
+    const data = {
+      jobId: Number(
+        body.jobId,
+      ),
+
+      fullName: String(
+        body.fullName ?? "",
+      ),
+
+      email: String(
+        body.email ?? "",
+      ),
+
+      phone: String(
+        body.phone ?? "",
+      ),
+
+      resume,
+    };
+
+    const result =
+      createApplicationSchema.safeParse(
+        data,
+      );
+
+    if (!result.success) {
+      console.error(
+        "application validation error:",
+        result.error.flatten()
+      )
+      return c.json(
+        {
+          success: false,
+          message:
+            "Validation failed.",
+          errors:
+            result.error.flatten(),
+        },
+        400,
+      );
+    }
+
+    const application =
+      await createApplication(
+        result.data,
+        user.id,
+      );
+
     return c.json(
       {
+        success: true,
         message:
-          "Invalid application ID.",
+          "Application submitted successfully.",
+        data: application,
       },
-      400,
+      201,
     );
-  }
+  },
+);
 
-  const application =
-    await getApplicationById(id);
+// ================================
+// APPLICATION STATISTICS
+// Admin / Recruiter
+// ================================
 
-  if (!application) {
-    return c.json(
-      {
-        message:
-          "Application not found.",
-      },
-      404,
-    );
-  }
+applicationsRouter.get(
+  "/stats",
+  requireAuth,
+  requirePermission(
+    "applications.stats.read",
+  ),
+  async (c) => {
+    const stats =
+      await getApplicationStats();
 
-  return c.json({
-    data: application,
-  });
-});
+    return c.json({
+      success: true,
+      data: stats,
+    });
+  },
+);
 
-// Get applications by job ID
+// ================================
+// GET APPLICATIONS BY JOB
+// ================================
+
 applicationsRouter.get(
   "/job/:jobId",
+  requireAuth,
+  requirePermission(
+    "applications.read",
+  ),
   async (c) => {
     const jobId = Number(
       c.req.param("jobId"),
@@ -119,6 +189,7 @@ applicationsRouter.get(
     ) {
       return c.json(
         {
+          success: false,
           message:
             "Invalid job ID.",
         },
@@ -127,17 +198,27 @@ applicationsRouter.get(
     }
 
     const applications =
-      await getApplicationsByJobId(jobId);
+      await getApplicationsByJobId(
+        jobId,
+      );
 
     return c.json({
+      success: true,
       data: applications,
     });
   },
 );
 
-// Admin approves or rejects application
-applicationsRouter.patch(
-  "/:id/status",
+// ================================
+// GET APPLICATION BY ID
+// ================================
+
+applicationsRouter.get(
+  "/:id",
+  requireAuth,
+  requirePermission(
+    "applications.read",
+  ),
   async (c) => {
     const id = Number(
       c.req.param("id"),
@@ -149,6 +230,60 @@ applicationsRouter.patch(
     ) {
       return c.json(
         {
+          success: false,
+          message:
+            "Invalid application ID.",
+        },
+        400,
+      );
+    }
+
+    const application =
+      await getApplicationById(id);
+
+    if (!application) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Application not found.",
+        },
+        404,
+      );
+    }
+
+    return c.json({
+      success: true,
+      data: application,
+    });
+  },
+);
+
+
+
+// ================================
+// UPDATE APPLICATION STATUS
+// Admin / Recruiter
+// ================================
+
+applicationsRouter.patch(
+  "/:id/status",
+  requireAuth,
+  requirePermission(
+    "applications.status.update",
+  ),
+  async (c) => {
+    const id = Number(
+      c.req.param("id"),
+    );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
           message:
             "Invalid application ID.",
         },
@@ -160,11 +295,14 @@ applicationsRouter.patch(
       await c.req.json();
 
     if (
-      body.status !== "approved" &&
-      body.status !== "rejected"
+      body.status !==
+        "approved" &&
+      body.status !==
+        "rejected"
     ) {
       return c.json(
         {
+          success: false,
           message:
             "Status must be either approved or rejected.",
         },
@@ -181,6 +319,7 @@ applicationsRouter.patch(
     if (!updatedApplication) {
       return c.json(
         {
+          success: false,
           message:
             "Application not found.",
         },
@@ -189,6 +328,7 @@ applicationsRouter.patch(
     }
 
     return c.json({
+      success: true,
       message:
         `Application ${body.status} successfully.`,
       data: updatedApplication,

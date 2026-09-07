@@ -1,27 +1,50 @@
 import { eq } from "drizzle-orm";
-import { db } from "../db/index.js";
-import { screeningDecisions } from "../db/schema.js";
 
-export async function getScreeningDecision(stageId: string) {
+import { db } from "../db/index.js";
+
+import {
+  screeningDecisions,
+} from "../db/schema.js";
+
+export async function getScreeningDecision(
+  applicationId: number,
+) {
   const result = await db
     .select({
-      decision: screeningDecisions.decision,
-      note: screeningDecisions.note,
-      updatedAt: screeningDecisions.updatedAt,
+      id: screeningDecisions.id,
+      applicationId:
+        screeningDecisions.applicationId,
+      decision:
+        screeningDecisions.decision,
+      note:
+        screeningDecisions.note,
+      updatedAt:
+        screeningDecisions.updatedAt,
     })
     .from(screeningDecisions)
-    .where(eq(screeningDecisions.stageId, stageId))
+    .where(
+      eq(
+        screeningDecisions.applicationId,
+        applicationId,
+      ),
+    )
     .limit(1);
 
   return result[0] ?? null;
 }
 
 export async function saveScreeningDecision(
-  stageId: string,
-  decision: "pass" | "hold" | "reject",
+  applicationId: number,
+  decision:
+    | "pass"
+    | "hold"
+    | "reject",
   note?: string,
 ) {
-  const existing = await getScreeningDecision(stageId);
+  const existing =
+    await getScreeningDecision(
+      applicationId,
+    );
 
   if (existing) {
     const result = await db
@@ -31,11 +54,22 @@ export async function saveScreeningDecision(
         note,
         updatedAt: new Date(),
       })
-      .where(eq(screeningDecisions.stageId, stageId))
+      .where(
+        eq(
+          screeningDecisions.applicationId,
+          applicationId,
+        ),
+      )
       .returning({
-        decision: screeningDecisions.decision,
-        note: screeningDecisions.note,
-        updatedAt: screeningDecisions.updatedAt,
+        id: screeningDecisions.id,
+        applicationId:
+          screeningDecisions.applicationId,
+        decision:
+          screeningDecisions.decision,
+        note:
+          screeningDecisions.note,
+        updatedAt:
+          screeningDecisions.updatedAt,
       });
 
     return result[0];
@@ -44,14 +78,20 @@ export async function saveScreeningDecision(
   const result = await db
     .insert(screeningDecisions)
     .values({
-      stageId,
+      applicationId,
       decision,
       note,
     })
     .returning({
-      decision: screeningDecisions.decision,
-      note: screeningDecisions.note,
-      updatedAt: screeningDecisions.updatedAt,
+      id: screeningDecisions.id,
+      applicationId:
+        screeningDecisions.applicationId,
+      decision:
+        screeningDecisions.decision,
+      note:
+        screeningDecisions.note,
+      updatedAt:
+        screeningDecisions.updatedAt,
     });
 
   return result[0];

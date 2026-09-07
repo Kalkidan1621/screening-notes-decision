@@ -359,7 +359,7 @@ function JobsPage() {
                   "
                 >
 
-                  View
+                  View details
 
                   <span>
                     →

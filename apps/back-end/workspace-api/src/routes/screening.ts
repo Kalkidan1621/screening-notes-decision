@@ -1,58 +1,124 @@
 import { Hono } from "hono";
 
-import { screeningDecisionSchema } from "../schemas/screening.js";
+import {
+  screeningDecisionSchema,
+} from "../schemas/screening.js";
+
 import {
   getScreeningDecision,
   saveScreeningDecision,
 } from "../services/screening.js";
 
+import {
+  requireAuth,
+  requirePermission,
+} from "../modules/auth/auth.middleware.js";
+
 const screening = new Hono();
 
-// GET saved decision
-screening.get(
-  "/hiring/application/screening/:stageId/decision",
-  async (c) => {
-    const stageId = c.req.param("stageId");
+// ================================
+// GET SAVED SCREENING DECISION
+// ================================
 
-    const decision = await getScreeningDecision(stageId);//db data
+screening.get(
+  "/hiring/application/screening/:applicationId/decision",
+  requireAuth,
+  requirePermission("screening.read"),
+  async (c) => {
+    const applicationId = Number(
+      c.req.param("applicationId"),
+    );
+
+    if (
+      !Number.isInteger(applicationId) ||
+      applicationId <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Invalid application ID.",
+        },
+        400,
+      );
+    }
+
+    const decision =
+      await getScreeningDecision(
+        applicationId,
+      );
 
     return c.json({
+      success: true,
       data: decision,
     });
-  }
+  },
 );
 
+// ================================
+// CREATE / UPDATE SCREENING DECISION
+// ================================
 
-// POST create/update decision
 screening.post(
-  "/hiring/application/screening/:stageId/decision",
+  "/hiring/application/screening/:applicationId/decision",
+  requireAuth,
+  requirePermission(
+    "screening.decision.write",
+  ),
   async (c) => {
-    const stageId = c.req.param("stageId");//url wust yalewun stageid found
+    const applicationId = Number(
+      c.req.param("applicationId"),
+    );
 
-    const body = await c.req.json();
+    if (
+      !Number.isInteger(applicationId) ||
+      applicationId <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Invalid application ID.",
+        },
+        400,
+      );
+    }
 
-    const result = screeningDecisionSchema.safeParse(body);
+    const body =
+      await c.req.json();
+
+    const result =
+      screeningDecisionSchema.safeParse(
+        body,
+      );
 
     if (!result.success) {
       return c.json(
         {
-          message: "Validation failed",
-          errors: result.error.flatten(),
+          success: false,
+          message:
+            "Validation failed.",
+          errors:
+            result.error.flatten(),
         },
-        400
+        400,
       );
     }
 
-    const saved = await saveScreeningDecision(
-      stageId,
-      result.data.decision,
-      result.data.note
-    );
+    const saved =
+      await saveScreeningDecision(
+        applicationId,
+        result.data.decision,
+        result.data.note,
+      );
 
     return c.json({
+      success: true,
+      message:
+        "Screening decision saved successfully.",
       data: saved,
     });
-  }
+  },
 );
 
 export default screening;

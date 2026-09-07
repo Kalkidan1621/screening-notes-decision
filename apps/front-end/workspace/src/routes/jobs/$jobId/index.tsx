@@ -1,6 +1,7 @@
 import {
   createFileRoute,
   Link,
+  useNavigate,
 } from "@tanstack/react-router";
 
 import {
@@ -29,6 +30,7 @@ export const Route = createFileRoute(
 function JobDetailsPage() {
   const { jobId } =
     Route.useParams();
+  const navigate = useNavigate();
 
   const [job, setJob] =
     useState<Job | null>(null);
@@ -412,18 +414,20 @@ function JobDetailsPage() {
           </section>
 
 
-          <Link
-            to="/jobs/$jobId/apply"
-            params={{
-              jobId: String(jobId),
-            }}
-            className="apply-now-button"
-          >
-
-            Apply Now
-
-          </Link>
-
+          <button
+  type="button"
+  className="apply-now-button"
+  onClick={() => {
+    navigate({
+      to: "/candidate/register",
+      search: {
+        redirect: `/jobs/${jobId}/apply`,
+      },
+    });
+  }}
+>
+  Apply Now
+</button>
         </section>
 
       </div>

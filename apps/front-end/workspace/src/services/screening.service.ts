@@ -1,79 +1,90 @@
-import type { ScreeningDecisionResponse } from "../types/screening";
-
 const API_URL = "http://localhost:3000";
 
-async function getErrorMessage(response: Response) {
-  try {
-    const errorData = await response.json();
+// ================================
+// TYPES
+// ================================
 
-    return (
-      errorData.message ||
-      `Request failed with status ${response.status}`
-    );
-  } catch {
-    return `Request failed with status ${response.status}`;
-  }
-}
+export type ScreeningDecision =
+  | "pass"
+  | "hold"
+  | "reject";
+
+export type ScreeningResult = {
+  id: number;
+
+  applicationId: number;
+
+  decision: ScreeningDecision;
+
+  note: string | null;
+
+  updatedAt: string;
+
+  applicationStatus: string;
+};
+
+// ================================
+// GET SCREENING DECISION
+// ================================
 
 export async function getScreeningDecision(
-  stageId: string,
-): Promise<ScreeningDecisionResponse> {
-  try {
-    const response = await fetch(
-      `${API_URL}/hiring/application/screening/${stageId}/decision`,
+  applicationId: number,
+): Promise<ScreeningResult | null> {
+  const response = await fetch(
+    `${API_URL}/hiring/screening/application/${applicationId}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to load screening decision.",
     );
-
-    if (!response.ok) {
-      const message = await getErrorMessage(response);
-
-      throw new Error(
-        `Failed to load screening decision: ${message}`,
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error("Failed to load screening decision.");
   }
+
+  return data.data ?? null;
 }
 
+// ================================
+// SAVE SCREENING DECISION
+// ================================
+
 export async function saveScreeningDecision(
-  stageId: string,
-  data: {
-    decision: "pass" | "hold" | "reject";
-    note: string;
-  },
-): Promise<ScreeningDecisionResponse> {
-  try {
-    const response = await fetch(
-      `${API_URL}/hiring/application/screening/${stageId}/decision`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+  applicationId: number,
+  decision: ScreeningDecision,
+  note: string,
+): Promise<ScreeningResult> {
+  const response = await fetch(
+    `${API_URL}/hiring/screening/application/${applicationId}`,
+    {
+      method: "POST",
+
+      credentials: "include",
+
+      headers: {
+        "Content-Type": "application/json",
       },
+
+      body: JSON.stringify({
+        decision,
+        note,
+      }),
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to save screening decision.",
     );
-
-    if (!response.ok) {
-      const message = await getErrorMessage(response);
-
-      throw new Error(
-        `Failed to save screening decision: ${message}`,
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error("Failed to save screening decision.");
   }
+
+  return data.data as ScreeningResult;
 }
