@@ -189,3 +189,76 @@ export async function updateProfilePhoto(
 
   return result;
 }
+// ================================
+// UPDATE PROFILE
+// ================================
+
+export type UpdateProfileInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
+export async function updateProfile(
+  data: UpdateProfileInput,
+) {
+  const response = await fetch(
+    `${API_URL}/auth/profile`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    },
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to update profile.",
+    );
+  }
+
+  return result;
+}
+
+// ================================
+// CHANGE PASSWORD
+// ================================
+
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+export async function changePassword(
+  data: ChangePasswordInput,
+) {
+  const response = await fetch(
+    `${API_URL}/auth/profile/password`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    },
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ||
+        "Failed to change password.",
+    );
+  }
+
+  return result;
+}

@@ -196,7 +196,7 @@ function ScreeningPage() {
         </div>
 
         <Link
-          to="/admin/applications"
+          to="/admin/applications/$applicationId"
           className="back-button"
         >
           ← Back to Applications

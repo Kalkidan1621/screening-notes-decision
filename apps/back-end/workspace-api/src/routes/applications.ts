@@ -15,6 +15,10 @@ import {
 } from "../services/applications.js";
 
 import {
+  getApplicationInterview,
+} from "./interview/interview.service.js";
+
+import {
   requireAuth,
   requirePermission,
   requireRole,
@@ -67,6 +71,97 @@ applicationsRouter.get(
     });
   },
 );
+
+// ================================
+// GET MY APPLICATION INTERVIEW
+// Candidate only
+// ================================
+
+applicationsRouter.get(
+  "/candidate/me/:applicationId/interview",
+  requireAuth,
+  requireRole("CANDIDATE"),
+  async (c) => {
+    const user = c.get("user");
+
+    const applicationId = Number(
+      c.req.param("applicationId"),
+    );
+
+    if (
+      !Number.isInteger(applicationId) ||
+      applicationId <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
+          message: "Invalid application ID.",
+        },
+        400,
+      );
+    }
+
+    try {
+      /*
+       * First verify that this application
+       * belongs to the authenticated candidate.
+       */
+      const applications =
+        await getApplicationsByCandidateId(
+          user.id,
+        );
+
+      const application =
+        applications.find(
+          (item) =>
+            item.id === applicationId,
+        );
+
+      if (!application) {
+        return c.json(
+          {
+            success: false,
+            message:
+              "Application not found.",
+          },
+          404,
+        );
+      }
+
+      /*
+       * The interview service already knows
+       * how to retrieve an interview by
+       * application ID.
+       */
+      const interview =
+        await getApplicationInterview(
+          applicationId,
+        );
+
+      return c.json({
+        success: true,
+        data: interview,
+      });
+    } catch (error) {
+      console.error(
+        "Get candidate interview error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to get interview details.",
+        },
+        500,
+      );
+    }
+  },
+);
+
 // ================================
 // CREATE APPLICATION
 // Candidate

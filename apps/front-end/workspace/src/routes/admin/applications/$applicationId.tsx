@@ -43,6 +43,7 @@ import type {
 
 import "@/styles/admin-applications.css";
 
+const API_URL = "http://localhost:3000";
 
 export const Route = createFileRoute(
   "/admin/applications/$applicationId",
@@ -61,6 +62,18 @@ type InterviewAction =
   | "completed"
   | "cancelled"
   | "no_show";
+
+type Interviewer = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roleName: string;
+};
+
+/* =========================================================
+   APPLICATION DETAILS PAGE
+========================================================= */
 
 function ApplicationDetailsPage() {
   const { applicationId } = Route.useParams();
@@ -97,14 +110,15 @@ function ApplicationDetailsPage() {
   const [showInterviewForm, setShowInterviewForm] =
     useState(false);
 
-  /*
-   * -------------------------------------------------------
-   * LOAD APPLICATION
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     LOAD APPLICATION
+  ======================================================= */
 
   const loadApplication = useCallback(async () => {
-    if (!Number.isFinite(numericApplicationId)) {
+    if (
+      !Number.isInteger(numericApplicationId) ||
+      numericApplicationId <= 0
+    ) {
       setError("Invalid application ID.");
       setLoading(false);
       return;
@@ -112,7 +126,9 @@ function ApplicationDetailsPage() {
 
     try {
       const data =
-        await getApplicationById(numericApplicationId);
+        await getApplicationById(
+          numericApplicationId,
+        );
 
       setApplication(data);
     } catch (err) {
@@ -124,14 +140,15 @@ function ApplicationDetailsPage() {
     }
   }, [numericApplicationId]);
 
-  /*
-   * -------------------------------------------------------
-   * LOAD INTERVIEW
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     LOAD INTERVIEW
+  ======================================================= */
 
   const loadInterview = useCallback(async () => {
-    if (!Number.isFinite(numericApplicationId)) {
+    if (
+      !Number.isInteger(numericApplicationId) ||
+      numericApplicationId <= 0
+    ) {
       return;
     }
 
@@ -147,15 +164,16 @@ function ApplicationDetailsPage() {
     }
   }, [numericApplicationId]);
 
-  /*
-   * -------------------------------------------------------
-   * LOAD HIRING DECISION
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     LOAD HIRING DECISION
+  ======================================================= */
 
   const loadHiringDecision =
     useCallback(async () => {
-      if (!Number.isFinite(numericApplicationId)) {
+      if (
+        !Number.isInteger(numericApplicationId) ||
+        numericApplicationId <= 0
+      ) {
         return;
       }
 
@@ -171,11 +189,9 @@ function ApplicationDetailsPage() {
       }
     }, [numericApplicationId]);
 
-  /*
-   * -------------------------------------------------------
-   * INITIAL LOAD
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -212,11 +228,9 @@ function ApplicationDetailsPage() {
     loadHiringDecision,
   ]);
 
-  /*
-   * -------------------------------------------------------
-   * REFRESH ALL
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     REFRESH ALL
+  ======================================================= */
 
   const refreshAll = useCallback(async () => {
     await Promise.all([
@@ -230,11 +244,9 @@ function ApplicationDetailsPage() {
     loadHiringDecision,
   ]);
 
-  /*
-   * -------------------------------------------------------
-   * SCHEDULE INTERVIEW
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     SCHEDULE INTERVIEW
+  ======================================================= */
 
   const handleScheduleInterview = async (
     data: CreateInterviewInput,
@@ -272,11 +284,9 @@ function ApplicationDetailsPage() {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * REVIEW AGAIN
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     REVIEW AGAIN
+  ======================================================= */
 
   const handleReviewAgain = async () => {
     if (!application) {
@@ -318,11 +328,9 @@ function ApplicationDetailsPage() {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * MARK AS HIRED
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     MARK AS HIRED
+  ======================================================= */
 
   const handleMarkAsHired = async () => {
     if (!application) {
@@ -364,78 +372,167 @@ function ApplicationDetailsPage() {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * INTERVIEW STATUS
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     INTERVIEW STATUS
+  ======================================================= */
+const handleInterviewAction = async (
+  action: InterviewAction,
+) => {
+  if (!interview) {
+    return;
+  }
 
-  const handleInterviewAction = async (
-    action: InterviewAction,
-  ) => {
-    if (!interview) {
-      return;
-    }
-
-    const messages: Record<
-      InterviewAction,
-      string
-    > = {
-      completed:
-        "Mark this interview as completed?",
-      cancelled:
-        "Cancel this interview?",
-      no_show:
-        "Mark this interview as no-show?",
-    };
-
-    const confirmed = window.confirm(
-      messages[action],
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setInterviewLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await updateInterviewStatus(
-        interview.id,
-        action,
-      );
-
-      await refreshAll();
-
-      if (action === "completed") {
-        setActiveTab("hiring");
-
-        setSuccess(
-          "Interview completed. Application moved to Hiring Decision.",
-        );
-      } else {
-        setSuccess(
-          `Interview marked as ${formatInterviewStatus(action)}.`,
-        );
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to update interview.",
-      );
-    } finally {
-      setInterviewLoading(false);
-    }
+  const messages: Record<
+    InterviewAction,
+    string
+  > = {
+    completed:
+      "Mark this interview as completed?",
+    cancelled:
+      "Cancel this interview?",
+    no_show:
+      "Mark this interview as no-show?",
   };
 
-  /*
-   * -------------------------------------------------------
-   * HIRING DECISION
-   * -------------------------------------------------------
-   */
+  const confirmed =
+    window.confirm(messages[action]);
+
+  if (!confirmed) {
+    return;
+  }
+
+  setInterviewLoading(true);
+  setError("");
+  setSuccess("");
+
+  try {
+    // ========================================
+    // 1. Update interview
+    // ========================================
+
+    await updateInterviewStatus(
+      interview.id,
+      action,
+    );
+
+    // ========================================
+    // 2. Reload application from backend
+    // ========================================
+
+    const updatedApplication =
+      await getApplicationById(
+        numericApplicationId,
+      );
+
+    // ========================================
+    // 3. Reload interview
+    // ========================================
+
+    const updatedInterview =
+      await getApplicationInterview(
+        numericApplicationId,
+      );
+
+    // ========================================
+    // 4. Reload hiring decision
+    // ========================================
+
+    const updatedHiringDecision =
+      await getHiringDecision(
+        numericApplicationId,
+      );
+
+    // ========================================
+    // 5. Update React state
+    // ========================================
+
+    setApplication(
+      updatedApplication,
+    );
+
+    setInterview(
+      updatedInterview,
+    );
+
+    setHiringDecision(
+      updatedHiringDecision,
+    );
+
+    // ========================================
+    // 6. COMPLETED
+    // ========================================
+
+    if (action === "completed") {
+      const newStatus =
+        normalizeStatus(
+          updatedApplication.status,
+        );
+
+      console.log(
+        "Application status after interview:",
+        newStatus,
+      );
+
+      if (
+        newStatus !==
+        "hiring_decision"
+      ) {
+        throw new Error(
+          `Interview completed, but application status is "${updatedApplication.status}". Expected "hiring_decision".`,
+        );
+      }
+
+      setActiveTab("hiring");
+
+      setSuccess(
+        "Interview completed. Application moved to Hiring Decision.",
+      );
+
+      return;
+    }
+
+    // ========================================
+    // 7. CANCELLED
+    // ========================================
+
+    if (action === "cancelled") {
+      setSuccess(
+        "Interview marked as cancelled.",
+      );
+
+      return;
+    }
+
+    // ========================================
+    // 8. NO SHOW
+    // ========================================
+
+    if (action === "no_show") {
+      setSuccess(
+        "Interview marked as no-show.",
+      );
+    }
+  } catch (err) {
+    console.error(
+      "Interview action error:",
+      err,
+    );
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Failed to update interview.",
+    );
+  } finally {
+    setInterviewLoading(false);
+  }
+};
+
+
+
+  /* =======================================================
+     HIRING DECISION
+  ======================================================= */
 
   const handleHiringDecision = async (
     decision: HiringDecision,
@@ -484,11 +581,9 @@ function ApplicationDetailsPage() {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * LOADING
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     LOADING
+  ======================================================= */
 
   if (loading) {
     return (
@@ -496,7 +591,9 @@ function ApplicationDetailsPage() {
         <div className="application-loading">
           <div className="application-spinner" />
 
-          <h2>Loading application...</h2>
+          <h2>
+            Loading application...
+          </h2>
 
           <p>
             Please wait while we load the candidate
@@ -507,19 +604,21 @@ function ApplicationDetailsPage() {
     );
   }
 
-  /*
-   * -------------------------------------------------------
-   * ERROR / NOT FOUND
-   * -------------------------------------------------------
-   */
+  /* =======================================================
+     NOT FOUND
+  ======================================================= */
 
   if (!application) {
     return (
       <div className="application-page">
         <div className="application-error-page">
-          <div className="error-icon">!</div>
+          <div className="error-icon">
+            !
+          </div>
 
-          <h2>Application not found</h2>
+          <h2>
+            Application not found
+          </h2>
 
           <p>
             {error ||
@@ -542,9 +641,6 @@ function ApplicationDetailsPage() {
 
   const candidateInitials =
     getInitials(application.fullName);
-
-  const statusLabel =
-    formatApplicationStatus(currentStatus);
 
   return (
     <div className="application-page">
@@ -578,10 +674,14 @@ function ApplicationDetailsPage() {
 
         {error && (
           <div className="application-alert alert-error">
-            <div className="alert-icon">!</div>
+            <div className="alert-icon">
+              !
+            </div>
 
             <div>
-              <strong>Something went wrong</strong>
+              <strong>
+                Something went wrong
+              </strong>
 
               <p>{error}</p>
             </div>
@@ -598,10 +698,14 @@ function ApplicationDetailsPage() {
 
         {success && (
           <div className="application-alert alert-success">
-            <div className="alert-icon">✓</div>
+            <div className="alert-icon">
+              ✓
+            </div>
 
             <div>
-              <strong>Success</strong>
+              <strong>
+                Success
+              </strong>
 
               <p>{success}</p>
             </div>
@@ -717,6 +821,7 @@ function ApplicationDetailsPage() {
         ================================================= */}
 
         <div className="application-tabs">
+
           <TabButton
             active={activeTab === "overview"}
             onClick={() =>
@@ -732,7 +837,7 @@ function ApplicationDetailsPage() {
               setActiveTab("screening")
             }
           >
-            Screening 
+            Screening
           </TabButton>
 
           <TabButton
@@ -761,6 +866,7 @@ function ApplicationDetailsPage() {
           >
             History
           </TabButton>
+
         </div>
 
         {/* =================================================
@@ -1089,13 +1195,22 @@ function InterviewForm({
     data: CreateInterviewInput,
   ) => Promise<void>;
 }) {
+  const [interviewers, setInterviewers] =
+    useState<Interviewer[]>([]);
+
+  const [interviewersLoading, setInterviewersLoading] =
+    useState(true);
+
+  const [interviewersError, setInterviewersError] =
+    useState("");
+
   const [interviewerId, setInterviewerId] =
     useState("");
 
   const [interviewType, setInterviewType] =
-    useState<CreateInterviewInput["interviewType"]>(
-      "online",
-    );
+    useState<
+      CreateInterviewInput["interviewType"]
+    >("online");
 
   const [scheduledAt, setScheduledAt] =
     useState("");
@@ -1106,43 +1221,147 @@ function InterviewForm({
   const [notes, setNotes] =
     useState("");
 
-const handleSubmit = async (event: React.FormEvent) => {
-  event.preventDefault();
+  const [formError, setFormError] =
+    useState("");
 
-  if (!scheduledAt) {
-    return;
-  }
+  /* =======================================================
+     LOAD INTERVIEWERS
+  ======================================================= */
 
-  let parsedInterviewerId: number | undefined;
+  useEffect(() => {
+    let mounted = true;
 
-  if (interviewerId.trim()) {
-    const value = Number(interviewerId);
+    async function loadInterviewers() {
+      setInterviewersLoading(true);
+      setInterviewersError("");
 
-    if (!Number.isInteger(value) || value <= 0) {
+      try {
+        const response = await fetch(
+          `${API_URL}/admin/users/interviewers`,
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              "Failed to load interviewers.",
+          );
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setInterviewers(
+          Array.isArray(data.data)
+            ? data.data
+            : [],
+        );
+      } catch (err) {
+        if (!mounted) {
+          return;
+        }
+
+        setInterviewersError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load interviewers.",
+        );
+      } finally {
+        if (mounted) {
+          setInterviewersLoading(false);
+        }
+      }
+    }
+
+    void loadInterviewers();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  /* =======================================================
+     SUBMIT
+  ======================================================= */
+
+  const handleSubmit = async (
+    event: React.FormEvent,
+  ) => {
+    event.preventDefault();
+
+    setFormError("");
+
+    if (!scheduledAt) {
+      setFormError(
+        "Please select the interview date and time.",
+      );
       return;
     }
 
-    parsedInterviewerId = value;
-  }
+    let parsedInterviewerId:
+      | number
+      | undefined;
 
-  const isoScheduledAt = new Date(scheduledAt).toISOString();
+    if (interviewerId.trim()) {
+      const value = Number(interviewerId);
 
-  await onSubmit({
-    interviewType,
-    scheduledAt: isoScheduledAt,
-    ...(parsedInterviewerId !== undefined
-      ? { interviewerId: parsedInterviewerId }
-      : {}),
-    ...(location.trim()
-      ? { location: location.trim() }
-      : {}),
-    ...(notes.trim()
-      ? { notes: notes.trim() }
-      : {}),
-  });
-};
+      if (
+        !Number.isInteger(value) ||
+        value <= 0
+      ) {
+        setFormError(
+          "Please select a valid interviewer.",
+        );
+        return;
+      }
 
+      parsedInterviewerId = value;
+    }
 
+    const date = new Date(scheduledAt);
+
+    if (Number.isNaN(date.getTime())) {
+      setFormError(
+        "Please select a valid interview date and time.",
+      );
+      return;
+    }
+
+    const isoScheduledAt =
+      date.toISOString();
+
+    await onSubmit({
+      interviewType,
+      scheduledAt: isoScheduledAt,
+
+      ...(parsedInterviewerId !== undefined
+        ? {
+            interviewerId:
+              parsedInterviewerId,
+          }
+        : {}),
+
+      ...(location.trim()
+        ? {
+            location:
+              location.trim(),
+          }
+        : {}),
+
+      ...(notes.trim()
+        ? {
+            notes:
+              notes.trim(),
+          }
+        : {}),
+    });
+  };
 
   return (
     <section className="content-card">
@@ -1157,26 +1376,98 @@ const handleSubmit = async (event: React.FormEvent) => {
         onSubmit={handleSubmit}
       >
 
+        {formError && (
+          <div className="application-alert alert-error">
+            <div className="alert-icon">
+              !
+            </div>
+
+            <div>
+              <strong>
+                Please check the form
+              </strong>
+
+              <p>{formError}</p>
+            </div>
+
+            <button
+              type="button"
+              className="alert-close"
+              onClick={() =>
+                setFormError("")
+              }
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         <div className="form-grid">
+
+          {/* =================================================
+              INTERVIEWER
+          ================================================= */}
 
           <div className="form-field">
             <label htmlFor="interviewerId">
-              Interviewer ID
+              Interviewer
             </label>
 
-            <input
+            <select
               id="interviewerId"
-              type="number"
-              min="1"
               value={interviewerId}
               onChange={(event) =>
                 setInterviewerId(
                   event.target.value,
                 )
               }
-              placeholder="Enter interviewer ID"
-            />
+              disabled={
+                interviewersLoading ||
+                loading
+              }
+            >
+              <option value="">
+                {interviewersLoading
+                  ? "Loading interviewers..."
+                  : "Select interviewer (optional)"}
+              </option>
+
+              {interviewers.map(
+                (interviewer) => (
+                  <option
+                    key={interviewer.id}
+                    value={interviewer.id}
+                  >
+                    {interviewer.firstName}{" "}
+                    {interviewer.lastName}
+                    {" — "}
+                    {formatRoleName(
+                      interviewer.roleName,
+                    )}
+                  </option>
+                ),
+              )}
+            </select>
+
+            {interviewersError && (
+              <small className="form-error">
+                {interviewersError}
+              </small>
+            )}
+
+            {!interviewersLoading &&
+              !interviewersError &&
+              interviewers.length === 0 && (
+                <small className="form-help">
+                  No active recruiters or hiring
+                  managers are available.
+                </small>
+              )}
           </div>
+
+          {/* =================================================
+              INTERVIEW TYPE
+          ================================================= */}
 
           <div className="form-field">
             <label htmlFor="interviewType">
@@ -1192,6 +1483,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                     .value as CreateInterviewInput["interviewType"],
                 )
               }
+              disabled={loading}
             >
               <option value="online">
                 Online
@@ -1206,6 +1498,10 @@ const handleSubmit = async (event: React.FormEvent) => {
               </option>
             </select>
           </div>
+
+          {/* =================================================
+              DATE & TIME
+          ================================================= */}
 
           <div className="form-field">
             <label htmlFor="scheduledAt">
@@ -1222,8 +1518,13 @@ const handleSubmit = async (event: React.FormEvent) => {
                   event.target.value,
                 )
               }
+              disabled={loading}
             />
           </div>
+
+          {/* =================================================
+              LOCATION
+          ================================================= */}
 
           <div className="form-field">
             <label htmlFor="location">
@@ -1233,6 +1534,7 @@ const handleSubmit = async (event: React.FormEvent) => {
             <input
               id="location"
               type="text"
+              maxLength={255}
               value={location}
               onChange={(event) =>
                 setLocation(
@@ -1240,10 +1542,15 @@ const handleSubmit = async (event: React.FormEvent) => {
                 )
               }
               placeholder="Office address or meeting URL"
+              disabled={loading}
             />
           </div>
 
         </div>
+
+        {/* =================================================
+            NOTES
+        ================================================= */}
 
         <div className="form-field">
           <label htmlFor="interviewNotes">
@@ -1253,13 +1560,23 @@ const handleSubmit = async (event: React.FormEvent) => {
           <textarea
             id="interviewNotes"
             rows={5}
+            maxLength={2000}
             value={notes}
             onChange={(event) =>
               setNotes(event.target.value)
             }
             placeholder="Add interview instructions or notes..."
+            disabled={loading}
           />
+
+          <div className="character-count">
+            {notes.length} / 2000
+          </div>
         </div>
+
+        {/* =================================================
+            ACTIONS
+        ================================================= */}
 
         <div className="form-actions">
 
@@ -1276,7 +1593,8 @@ const handleSubmit = async (event: React.FormEvent) => {
             type="submit"
             className="btn btn-primary"
             disabled={
-              loading || !scheduledAt
+              loading ||
+              !scheduledAt
             }
           >
             {loading
@@ -1308,6 +1626,11 @@ function InterviewDetails({
 }) {
   const interviewStatus =
     interview.status;
+
+  const interviewerName =
+    getInterviewerDisplayName(
+      interview,
+    );
 
   return (
     <div className="details-layout">
@@ -1343,9 +1666,7 @@ function InterviewDetails({
           <DetailBlock
             label="Interviewer"
             value={
-              interview.interviewerId
-                ? `User #${interview.interviewerId}`
-                : "Not assigned"
+              interviewerName
             }
           />
 
@@ -1365,7 +1686,9 @@ function InterviewDetails({
               Notes
             </span>
 
-            <p>{interview.notes}</p>
+            <p>
+              {interview.notes}
+            </p>
           </div>
         )}
 
@@ -1441,7 +1764,9 @@ function HiringTab({
   onMarkAsHired,
 }: {
   application: Application;
-  hiringDecision: HiringDecisionResult | null;
+  hiringDecision:
+    | HiringDecisionResult
+    | null;
   loading: boolean;
   onDecision: (
     decision: HiringDecision,
@@ -1496,7 +1821,9 @@ function HiringTab({
       </p>
 
       <div className="next-step-box">
-        <strong>Next step</strong>
+        <strong>
+          Next step
+        </strong>
 
         <span>
           Complete the interview and then return
@@ -1606,6 +1933,7 @@ function HiringDecisionForm({
               onClick={() =>
                 setDecision(option.value)
               }
+              disabled={loading}
             >
               <span className="decision-option-icon">
                 {option.icon}
@@ -1632,6 +1960,7 @@ function HiringDecisionForm({
         </div>
 
         <div className="form-field decision-note">
+
           <label htmlFor="hiringDecisionNote">
             Decision Notes
           </label>
@@ -1645,11 +1974,13 @@ function HiringDecisionForm({
               setNote(event.target.value)
             }
             placeholder="Explain the reason for this hiring decision..."
+            disabled={loading}
           />
 
           <div className="character-count">
             {note.length} / 2000
           </div>
+
         </div>
 
         <div className="decision-submit">
@@ -1658,7 +1989,8 @@ function HiringDecisionForm({
             type="submit"
             className="btn btn-primary btn-large"
             disabled={
-              loading || !decision
+              loading ||
+              !decision
             }
           >
             {loading
@@ -1685,7 +2017,9 @@ function HiringDecisionResultView({
   onMarkAsHired,
 }: {
   application: Application;
-  decision: HiringDecisionResult | null;
+  decision:
+    | HiringDecisionResult
+    | null;
   loading: boolean;
   onReviewAgain: () => Promise<void>;
   onMarkAsHired: () => Promise<void>;
@@ -1801,7 +2135,9 @@ function HiringDecisionResultView({
               Decision Notes
             </span>
 
-            <p>{decision.note}</p>
+            <p>
+              {decision.note}
+            </p>
 
           </div>
         )}
@@ -1818,8 +2154,8 @@ function HiringDecisionResultView({
 
           <div className="result-actions">
 
-            {(status === "on_hold" ||
-              status === "rejected") && (
+            {status === "on_hold"
+               && (
               <button
                 type="button"
                 className="btn btn-secondary btn-large"
@@ -1916,7 +2252,8 @@ function HistoryTab({
       )
     ) {
       result.push({
-        title: "Candidate passed screening",
+        title:
+          "Candidate passed screening",
         description:
           "Candidate progressed beyond the screening stage.",
         date: application.updatedAt,
@@ -1926,7 +2263,8 @@ function HistoryTab({
 
     if (interview) {
       result.push({
-        title: "Interview scheduled",
+        title:
+          "Interview scheduled",
         description:
           `${formatInterviewType(
             interview.interviewType,
@@ -1940,7 +2278,8 @@ function HistoryTab({
         "completed"
       ) {
         result.push({
-          title: "Interview completed",
+          title:
+            "Interview completed",
           description:
             "Interview was completed successfully.",
           date: interview.updatedAt,
@@ -1953,9 +2292,24 @@ function HistoryTab({
         "cancelled"
       ) {
         result.push({
-          title: "Interview cancelled",
+          title:
+            "Interview cancelled",
           description:
             "The scheduled interview was cancelled.",
+          date: interview.updatedAt,
+          type: "interview",
+        });
+      }
+
+      if (
+        interview.status ===
+        "no_show"
+      ) {
+        result.push({
+          title:
+            "Interview no-show",
+          description:
+            "The candidate did not attend the scheduled interview.",
           date: interview.updatedAt,
           type: "interview",
         });
@@ -1964,7 +2318,8 @@ function HistoryTab({
 
     if (hiringDecision) {
       result.push({
-        title: "Hiring decision recorded",
+        title:
+          "Hiring decision recorded",
         description:
           `Decision: ${formatHiringDecision(
             hiringDecision.decision,
@@ -1980,7 +2335,8 @@ function HistoryTab({
       ) === "hired"
     ) {
       result.push({
-        title: "Candidate hired",
+        title:
+          "Candidate hired",
         description:
           "Candidate completed the recruitment process.",
         date: application.updatedAt,
@@ -2015,6 +2371,7 @@ function HistoryTab({
               className="timeline-item"
               key={`${event.type}-${index}`}
             >
+
               <div
                 className={`timeline-dot timeline-${event.type}`}
               >
@@ -2045,6 +2402,7 @@ function HistoryTab({
                 </p>
 
               </div>
+
             </div>
           ),
         )}
@@ -2113,6 +2471,7 @@ function ApplicationPipeline({
     <section className="pipeline-card">
 
       <div className="pipeline-header">
+
         <div>
           <span className="section-eyebrow">
             RECRUITMENT PIPELINE
@@ -2128,6 +2487,7 @@ function ApplicationPipeline({
             status,
           )}
         </span>
+
       </div>
 
       <div className="pipeline">
@@ -2158,6 +2518,7 @@ function ApplicationPipeline({
                 }`}
                 key={step.key}
               >
+
                 <div className="pipeline-node">
                   {completed
                     ? "✓"
@@ -2180,6 +2541,7 @@ function ApplicationPipeline({
                     }`}
                   />
                 )}
+
               </div>
             );
           },
@@ -2190,6 +2552,7 @@ function ApplicationPipeline({
       {(status === "on_hold" ||
         status === "rejected") && (
         <div className="pipeline-notice">
+
           <strong>
             {status === "on_hold"
               ? "Application is on hold"
@@ -2200,6 +2563,7 @@ function ApplicationPipeline({
             The hiring decision can be reviewed
             again from the Hiring Decision tab.
           </span>
+
         </div>
       )}
 
@@ -2315,7 +2679,9 @@ function CardHeader({
           </span>
         )}
 
-        <h2>{title}</h2>
+        <h2>
+          {title}
+        </h2>
       </div>
 
       {right && (
@@ -2404,6 +2770,7 @@ function StatusBadge({
       className={`status-badge status-${status}`}
     >
       <span className="status-dot" />
+
       {formatApplicationStatus(
         status,
       )}
@@ -2420,7 +2787,9 @@ function InterviewStatusBadge({
     <span
       className={`interview-status interview-${status}`}
     >
-      {formatInterviewStatus(status)}
+      {formatInterviewStatus(
+        status,
+      )}
     </span>
   );
 }
@@ -2442,7 +2811,49 @@ function DecisionBadge({
 }
 
 /* =========================================================
-   HELPERS
+   INTERVIEWER HELPERS
+========================================================= */
+
+function getInterviewerDisplayName(
+  interview: Interview,
+) {
+  if (
+    interview.interviewerFirstName ||
+    interview.interviewerLastName
+  ) {
+    return [
+      interview.interviewerFirstName,
+      interview.interviewerLastName,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  if (interview.interviewerId) {
+    return `User #${interview.interviewerId}`;
+  }
+
+  return "Not assigned";
+}
+
+function formatRoleName(
+  role: string,
+) {
+  const normalized =
+    role
+      .toLowerCase()
+      .trim()
+      .replace(/_/g, " ");
+
+  return normalized.replace(
+    /\b\w/g,
+    (character) =>
+      character.toUpperCase(),
+  );
+}
+
+/* =========================================================
+   GENERAL HELPERS
 ========================================================= */
 
 function getInitials(
@@ -2493,8 +2904,9 @@ function formatApplicationStatus(
   };
 
   return (
-    labels[normalizeStatus(status)] ||
-    status
+    labels[
+      normalizeStatus(status)
+    ] || status
   );
 }
 
@@ -2512,7 +2924,8 @@ function formatInterviewStatus(
   };
 
   return (
-    labels[status] || status
+    labels[status] ||
+    status
   );
 }
 
@@ -2528,7 +2941,10 @@ function formatInterviewType(
     phone: "Phone",
   };
 
-  return labels[type] || type;
+  return (
+    labels[type] ||
+    type
+  );
 }
 
 function formatHiringDecision(
@@ -2549,9 +2965,14 @@ function formatHiringDecision(
 function formatDate(
   value: string,
 ) {
-  const date = new Date(value);
+  const date =
+    new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
     return value;
   }
 
@@ -2568,9 +2989,14 @@ function formatDate(
 function formatDateTime(
   value: string,
 ) {
-  const date = new Date(value);
+  const date =
+    new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
     return value;
   }
 
@@ -2585,3 +3011,4 @@ function formatDateTime(
     },
   ).format(date);
 }
+

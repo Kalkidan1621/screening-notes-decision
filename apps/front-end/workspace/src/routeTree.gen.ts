@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAccountRouteImport } from './routes/admin/account'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
+import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as AdminScreeningRouteImport } from './routes/admin/screening'
 import { Route as CandidateApplicationsRouteImport } from './routes/candidate/applications'
 import { Route as CandidateLoginRouteImport } from './routes/candidate/login'
@@ -54,9 +56,19 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
   id: '/applications',
   path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProfileRoute = AdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminScreeningRoute = AdminScreeningRouteImport.update({
@@ -161,7 +173,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/screening': typeof AdminScreeningRouteWithChildren
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/login': typeof CandidateLoginRoute
@@ -186,6 +200,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/screening': typeof AdminScreeningRouteWithChildren
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/login': typeof CandidateLoginRoute
@@ -212,7 +228,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/screening': typeof AdminScreeningRouteWithChildren
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/login': typeof CandidateLoginRoute
@@ -240,7 +258,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/admin/account'
     | '/admin/applications'
+    | '/admin/profile'
     | '/admin/screening'
     | '/candidate/applications'
     | '/candidate/login'
@@ -265,6 +285,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/account'
+    | '/admin/profile'
     | '/admin/screening'
     | '/candidate/applications'
     | '/candidate/login'
@@ -290,7 +312,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/admin/account'
     | '/admin/applications'
+    | '/admin/profile'
     | '/admin/screening'
     | '/candidate/applications'
     | '/candidate/login'
@@ -358,11 +382,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/applications': {
       id: '/admin/applications'
       path: '/applications'
       fullPath: '/admin/applications'
       preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/profile': {
+      id: '/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/screening': {
@@ -527,7 +565,9 @@ const AdminScreeningRouteWithChildren = AdminScreeningRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAccountRoute: typeof AdminAccountRoute
   AdminApplicationsRoute: typeof AdminApplicationsRouteWithChildren
+  AdminProfileRoute: typeof AdminProfileRoute
   AdminScreeningRoute: typeof AdminScreeningRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   AdminJobsJobIdRoute: typeof AdminJobsJobIdRoute
@@ -539,7 +579,9 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountRoute: AdminAccountRoute,
   AdminApplicationsRoute: AdminApplicationsRouteWithChildren,
+  AdminProfileRoute: AdminProfileRoute,
   AdminScreeningRoute: AdminScreeningRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   AdminJobsJobIdRoute: AdminJobsJobIdRoute,

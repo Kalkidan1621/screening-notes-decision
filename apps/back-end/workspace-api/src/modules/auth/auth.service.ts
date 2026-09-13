@@ -16,7 +16,9 @@ import type {
   RegisterInput,
   LoginInput,
   CandidateRegisterInput,
-   AdminCreateUserInput,
+  AdminCreateUserInput,
+  UpdateProfileInput,
+  ChangePasswordInput,
 } from "./auth.schema.js";
 
 import cloudinary from "../../config/cloudinary.js";
@@ -719,4 +721,110 @@ export async function updateProfilePhoto(
   }
 
   return updated[0];
+}
+// ================================
+// UPDATE PROFILE
+// ================================
+
+export async function updateProfile(
+  userId: number,
+  data: UpdateProfileInput,
+) {
+  const email = data.email.toLowerCase();
+
+  // Check whether another user already uses this email
+  const existingUser = await db
+    .select({
+      id: users.id,
+    })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (
+    existingUser[0] &&
+    existingUser[0].id !== userId
+  ) {
+    throw new Error(
+      "An account with this email already exists.",
+    );
+  }
+
+  const updated = await db
+    .update(users)
+    .set({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      email: users.email,
+      roleId: users.roleId,
+      profileImageUrl: users.profileImageUrl,
+      isActive: users.isActive,
+    });
+
+  if (!updated[0]) {
+    throw new Error(
+      "User profile could not be updated.",
+    );
+  }
+
+  return updated[0];
+}
+
+// ================================
+// CHANGE PASSWORD
+// ================================
+
+export async function changePassword(
+  userId: number,
+  data: ChangePasswordInput,
+) {
+  const result = await db
+    .select({
+      passwordHash: users.passwordHash,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  const user = result[0];
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  const currentPasswordValid =
+    await bcrypt.compare(
+      data.currentPassword,
+      user.passwordHash,
+    );
+
+  if (!currentPasswordValid) {
+    throw new Error(
+      "Current password is incorrect.",
+    );
+  }
+
+  const newPasswordHash =
+    await bcrypt.hash(
+      data.newPassword,
+      12,
+    );
+
+  await db
+    .update(users)
+    .set({
+      passwordHash: newPasswordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+
+  return true;
 }

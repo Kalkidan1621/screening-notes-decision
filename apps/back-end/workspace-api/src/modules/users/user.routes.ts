@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { and, eq, inArray } from "drizzle-orm";
 
 import {
   createUserSchema,
@@ -22,6 +23,9 @@ import {
   requireAuth,
   requireRole,
 } from "../auth/auth.middleware.js";
+
+import { db } from "../../db/index.js";
+import { roles, users } from "../../db/schema.js";
 
 const userRoutes = new Hono();
 
@@ -72,12 +76,86 @@ userRoutes.get(
         data,
       });
     } catch (error) {
-      console.error("GET /users/roles error:", error);
+      console.error(
+        "GET /users/roles error:",
+        error,
+      );
 
       return c.json(
         {
           success: false,
           message: "Failed to load roles.",
+        },
+        500,
+      );
+    }
+  },
+);
+
+/**
+ * GET /users/interviewers
+ *
+ * Returns only active users who can conduct interviews.
+ *
+ * Allowed roles:
+ * - RECRUITER
+ * - HIRING_MANAGER
+ */
+userRoutes.get(
+  "/interviewers",
+  requireAuth,
+  requireRole(
+    "SUPER_ADMIN",
+    "ADMIN",
+    "RECRUITER",
+    "HIRING_MANAGER",
+  ),
+  async (c) => {
+    try {
+      const data = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          roleId: users.roleId,
+          roleName: roles.name,
+          isActive: users.isActive,
+        })
+        .from(users)
+        .innerJoin(
+          roles,
+          eq(users.roleId, roles.id),
+        )
+        .where(
+          and(
+            eq(users.isActive, true),
+            inArray(roles.name, [
+              "RECRUITER",
+              "HIRING_MANAGER",
+            ]),
+          ),
+        )
+        .orderBy(
+          users.firstName,
+          users.lastName,
+        );
+
+      return c.json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      console.error(
+        "GET /users/interviewers error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            "Failed to load interviewers.",
         },
         500,
       );
@@ -123,7 +201,10 @@ userRoutes.get(
         data,
       });
     } catch (error) {
-      console.error("GET /users/:id error:", error);
+      console.error(
+        "GET /users/:id error:",
+        error,
+      );
 
       return c.json(
         {
@@ -147,13 +228,15 @@ userRoutes.post(
     try {
       const body = await c.req.json();
 
-      const parsed = createUserSchema.safeParse(body);
+      const parsed =
+        createUserSchema.safeParse(body);
 
       if (!parsed.success) {
         return c.json(
           {
             success: false,
-            message: parsed.error.issues[0]?.message ??
+            message:
+              parsed.error.issues[0]?.message ??
               "Invalid user data.",
             errors: parsed.error.flatten(),
           },
@@ -161,18 +244,24 @@ userRoutes.post(
         );
       }
 
-      const data = await createUser(parsed.data);
+      const data = await createUser(
+        parsed.data,
+      );
 
       return c.json(
         {
           success: true,
-          message: "User created successfully.",
+          message:
+            "User created successfully.",
           data,
         },
         201,
       );
     } catch (error) {
-      console.error("POST /users error:", error);
+      console.error(
+        "POST /users error:",
+        error,
+      );
 
       return c.json(
         {
@@ -211,28 +300,37 @@ userRoutes.patch(
 
       const body = await c.req.json();
 
-      const parsed = updateUserSchema.safeParse(body);
+      const parsed =
+        updateUserSchema.safeParse(body);
 
       if (!parsed.success) {
         return c.json(
           {
             success: false,
-            message: parsed.error.issues[0]?.message ??
+            message:
+              parsed.error.issues[0]?.message ??
               "Invalid user data.",
           },
           400,
         );
       }
 
-      const data = await updateUser(id, parsed.data);
+      const data = await updateUser(
+        id,
+        parsed.data,
+      );
 
       return c.json({
         success: true,
-        message: "User updated successfully.",
+        message:
+          "User updated successfully.",
         data,
       });
     } catch (error) {
-      console.error("PATCH /users/:id error:", error);
+      console.error(
+        "PATCH /users/:id error:",
+        error,
+      );
 
       return c.json(
         {
@@ -284,10 +382,11 @@ userRoutes.patch(
         );
       }
 
-      const data = await updateUserStatus(
-        id,
-        parsed.data.isActive,
-      );
+      const data =
+        await updateUserStatus(
+          id,
+          parsed.data.isActive,
+        );
 
       return c.json({
         success: true,
@@ -352,14 +451,16 @@ userRoutes.patch(
         );
       }
 
-      const data = await changeUserRole(
-        id,
-        parsed.data.roleId,
-      );
+      const data =
+        await changeUserRole(
+          id,
+          parsed.data.roleId,
+        );
 
       return c.json({
         success: true,
-        message: "User role updated successfully.",
+        message:
+          "User role updated successfully.",
         data,
       });
     } catch (error) {

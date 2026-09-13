@@ -223,6 +223,30 @@ export async function getMyApplications(): Promise<
 
   return response.json();
 }
+
+export async function getCandidateApplicationInterview(
+  applicationId: number,
+) {
+  const response = await fetch(
+    `${API_URL}/applications/candidate/me/${applicationId}/interview`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to load interview details.",
+    );
+  }
+
+  return data.data ?? null;
+}
+
 export async function updateApplicationStatus(
   applicationId: number,
   status: ApplicationStatus,

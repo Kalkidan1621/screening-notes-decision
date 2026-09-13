@@ -10,6 +10,8 @@ import {
   loginSchema,
   candidateRegisterSchema,
   adminCreateUserSchema,
+  updateProfileSchema,
+  changePasswordSchema,
 } from "./auth.schema.js";
 
 import {
@@ -19,7 +21,9 @@ import {
   loginUser,
   getCurrentUser,
   logoutUser,
-   updateProfilePhoto,
+  updateProfilePhoto,
+  updateProfile,
+  changePassword,
 } from "./auth.service.js";
 
 import {
@@ -347,6 +351,127 @@ authRoutes.get(
       success: true,
       data: user,
     });
+  },
+);
+
+// ================================
+// UPDATE PROFILE
+// ================================
+
+authRoutes.patch(
+  "/profile",
+  requireAuth,
+  async (c) => {
+    try {
+      const user = c.get("user");
+
+      const body = await c.req.json();
+
+      const parsed =
+        updateProfileSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return c.json(
+          {
+            success: false,
+            message: "Invalid profile data.",
+            errors:
+              parsed.error.flatten()
+                .fieldErrors,
+          },
+          400,
+        );
+      }
+
+      const updatedUser =
+        await updateProfile(
+          user.id,
+          parsed.data,
+        );
+
+      return c.json({
+        success: true,
+        message:
+          "Profile updated successfully.",
+        data: updatedUser,
+      });
+    } catch (error) {
+      console.error(
+        "Profile update error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to update profile.",
+        },
+        500,
+      );
+    }
+  },
+);
+
+// ================================
+// CHANGE PASSWORD
+// ================================
+
+authRoutes.patch(
+  "/profile/password",
+  requireAuth,
+  async (c) => {
+    try {
+      const user = c.get("user");
+
+      const body = await c.req.json();
+
+      const parsed =
+        changePasswordSchema.safeParse(body);
+
+      if (!parsed.success) {
+        return c.json(
+          {
+            success: false,
+            message:
+              "Invalid password data.",
+            errors:
+              parsed.error.flatten()
+                .fieldErrors,
+          },
+          400,
+        );
+      }
+
+      await changePassword(
+        user.id,
+        parsed.data,
+      );
+
+      return c.json({
+        success: true,
+        message:
+          "Password changed successfully.",
+      });
+    } catch (error) {
+      console.error(
+        "Password change error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to change password.",
+        },
+        400,
+      );
+    }
   },
 );
 

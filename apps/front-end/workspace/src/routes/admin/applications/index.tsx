@@ -169,9 +169,7 @@ function AdminApplicationsPage() {
 
       <div className="admin-applications-container">
 
-        {/* =========================================
-            HEADER
-        ========================================== */}
+        {/* HEADER */}
 
         <header className="admin-applications-header">
 
@@ -192,9 +190,7 @@ function AdminApplicationsPage() {
 
         </header>
 
-        {/* =========================================
-            ERROR
-        ========================================== */}
+        {/* ERROR */}
 
         {error && (
           <div

@@ -230,13 +230,6 @@ function AdminScreeningPage() {
 
  <div className="admin-screening-header-actions">
 
-    <Link
-      to="/admin/jobs/create"
-      className="admin-new-job-button"
-    >
-      + New Job
-    </Link>
-
           <button
             type="button"
             className="admin-refresh-button"

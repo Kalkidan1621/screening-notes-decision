@@ -1,12 +1,12 @@
 /* =========================================================
-   ADMIN PAGE LAYOUT
-   Root Header + Root Footer remain untouched.
+   ADMIN LAYOUT
+   Root Header + Root Footer remain untouched
    ========================================================= */
 
 .admin-layout {
   width: 100%;
-
-  min-height: 720px;
+  min-width: 0;
+  min-height: calc(100vh - 72px);
 
   display: flex;
   align-items: stretch;
@@ -14,10 +14,18 @@
   background: #f6f8fb;
 
   box-sizing: border-box;
+
+  overflow: visible;
 }
 
+/* =========================================================
+   MAIN CONTENT AREA
+   ========================================================= */
+
 .admin-main {
-  flex: 1;
+  flex: 1 1 auto;
+
+  width: calc(100% - 280px);
   min-width: 0;
 
   background: #f6f8fb;
@@ -25,24 +33,33 @@
   box-sizing: border-box;
 
   overflow-x: hidden;
-}
-
-.admin-content {
-  width: 100%;
-  min-width: 0;
-
-  padding: 28px 32px 40px;
-
-  box-sizing: border-box;
+  overflow-y: visible;
 }
 
 /* =========================================================
-   LARGE SCREEN
+   CONTENT
+   ========================================================= */
+
+.admin-content {
+  width: 100%;
+  max-width: none;
+
+  min-width: 0;
+
+  padding: 28px 32px 48px;
+
+  box-sizing: border-box;
+
+  overflow: visible;
+}
+
+/* =========================================================
+   LARGE DESKTOP
    ========================================================= */
 
 @media (min-width: 1400px) {
   .admin-content {
-    padding: 32px 40px 48px;
+    padding: 32px 40px 52px;
   }
 }
 
@@ -50,9 +67,23 @@
    TABLET
    ========================================================= */
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .admin-content {
-    padding: 24px;
+    padding: 24px 22px 40px;
+  }
+}
+
+/* =========================================================
+   SMALL TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .admin-main {
+    width: calc(100% - 240px);
+  }
+
+  .admin-content {
+    padding: 22px 18px 36px;
   }
 }
 
@@ -61,11 +92,37 @@
    ========================================================= */
 
 @media (max-width: 700px) {
-  .admin-content {
-    padding: 18px 14px 30px;
+  .admin-layout {
+    min-height: calc(100vh - 64px);
   }
 
-  .admin-layout {
-    min-height: 600px;
+  .admin-main {
+    width: calc(100% - 76px);
+
+    min-width: 0;
+
+    overflow-x: hidden;
+  }
+
+  .admin-content {
+    width: 100%;
+
+    padding: 18px 14px 32px;
+
+    box-sizing: border-box;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .admin-main {
+    width: calc(100% - 68px);
+  }
+
+  .admin-content {
+    padding: 14px 10px 28px;
   }
 }
