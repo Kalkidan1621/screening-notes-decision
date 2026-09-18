@@ -1,0 +1,8 @@
+{
+  "public": true,
+  "buildCommand": "pnpm --filter workspace-api build",
+  "outputDirectory": "apps/front-end/workspace/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
