@@ -1,6 +1,7 @@
 import {
   createFileRoute,
   useNavigate,
+  Link,
 } from "@tanstack/react-router";
 
 import { useState } from "react";
@@ -160,6 +161,12 @@ if (role === "SUPER_ADMIN") {
               disabled={loading}
             />
           </div>
+
+          <div className="forgot-password-link">
+  <Link to="/forgot-password">
+    Forgot Password?
+  </Link>
+</div>
 
           {error && (
             <div

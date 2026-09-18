@@ -1,0 +1,1 @@
+{"version":3,"file":"screening.service.d.ts","sourceRoot":"","sources":["../../../src/modules/screening/screening.service.ts"],"names":[],"mappings":"AAaA,MAAM,MAAM,iBAAiB,GACzB,MAAM,GACN,MAAM,GACN,QAAQ,CAAC;AAMb,wBAAsB,oBAAoB,CACxC,aAAa,EAAE,MAAM;;;;;;;UAsCtB;AAMD,wBAAsB,qBAAqB,CACzC,aAAa,EAAE,MAAM,EACrB,QAAQ,EAAE,iBAAiB,EAC3B,IAAI,CAAC,EAAE,MAAM;;;;;;;GAmJd"}

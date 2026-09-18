@@ -524,129 +524,11 @@ function AdminJobDetailsPage() {
 
         </nav>
 
-
         {/* =================================================
-            OVERVIEW
+          OVERVIEW
         ================================================= */}
 
         {activeTab === "overview" && (
-
-          <section className="job-tab-content">
-
-            <div className="job-section-card">
-
-              <div className="job-card-header">
-
-                <div>
-
-                  <span className="admin-job-eyebrow">
-                    POSITION OVERVIEW
-                  </span>
-
-                  <h2>
-                    Job Description
-                  </h2>
-
-                  <p>
-                    Overview of the position
-                    and responsibilities.
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <div className="job-description">
-
-                {job.description ? (
-                  <p>
-                    {job.description}
-                  </p>
-                ) : (
-                  <p className="empty-text">
-                    No job description
-                    available.
-                  </p>
-                )}
-
-              </div>
-
-            </div>
-
-
-            {/* QUICK SUMMARY */}
-
-            <div className="job-summary-grid">
-
-              <div className="job-summary-item">
-
-                <span>
-                  Employment Type
-                </span>
-
-                <strong>
-                  {formatEmploymentType(
-                    job.employmentType,
-                  )}
-                </strong>
-
-              </div>
-
-
-              <div className="job-summary-item">
-
-                <span>
-                  Experience
-                </span>
-
-                <strong>
-                  {job.experience ??
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-
-              <div className="job-summary-item">
-
-                <span>
-                  Salary
-                </span>
-
-                <strong>
-                  {job.salary ??
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-
-              <div className="job-summary-item">
-
-                <span>
-                  Location
-                </span>
-
-                <strong>
-                  {job.location ??
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-          </section>
-
-        )}
-
-
-        {/* =================================================
-            DETAILS
-        ================================================= */}
-
-        {activeTab === "details" && (
 
           <section className="job-tab-content">
 
@@ -818,6 +700,122 @@ function AdminJobDetailsPage() {
                       "Normal"}
                   </strong>
                 </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        )}
+
+        {/* =================================================
+            DETAILS
+        ================================================= */}
+
+        {activeTab === "details" && (
+
+          <section className="job-tab-content">
+
+            <div className="job-section-card">
+
+              <div className="job-card-header">
+
+                <div>
+
+                  <span className="admin-job-eyebrow">
+                    POSITION OVERVIEW
+                  </span>
+
+                  <h2>
+                    Job Description
+                  </h2>
+
+                  <p>
+                    Overview of the position
+                    and responsibilities.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div className="job-description">
+
+                {job.description ? (
+                  <p>
+                    {job.description}
+                  </p>
+                ) : (
+                  <p className="empty-text">
+                    No job description
+                    available.
+                  </p>
+                )}
+
+              </div>
+
+            </div>
+
+
+            {/* QUICK SUMMARY */}
+
+            <div className="job-summary-grid">
+
+              <div className="job-summary-item">
+
+                <span>
+                  Employment Type
+                </span>
+
+                <strong>
+                  {formatEmploymentType(
+                    job.employmentType,
+                  )}
+                </strong>
+
+              </div>
+
+
+              <div className="job-summary-item">
+
+                <span>
+                  Experience
+                </span>
+
+                <strong>
+                  {job.experience ??
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+
+              <div className="job-summary-item">
+
+                <span>
+                  Salary
+                </span>
+
+                <strong>
+                  {job.salary ??
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+
+              <div className="job-summary-item">
+
+                <span>
+                  Location
+                </span>
+
+                <strong>
+                  {job.location ??
+                    "Not specified"}
+                </strong>
 
               </div>
 

@@ -374,7 +374,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 26px;
+  margin-bottom: 20px;
 }
 
 .pipeline-header h2 {
@@ -474,17 +474,7 @@
   background: #595de2;
 }
 
-.pipeline-notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 22px;
-  padding: 11px 14px;
-  border-radius: 9px;
-  background: #faf8ed;
-  color: #765f20;
-  font-size: 12px;
-}
+
 
 .pipeline-notice span {
   color: #8b7a4b;
@@ -1699,4 +1689,22 @@ textarea:focus-visible {
     box-shadow: none;
     border-color: #dddddd;
   }
+}
+/* =========================================================
+   PIPELINE - COMPACT HEIGHT
+========================================================= */
+
+.pipeline-card {
+  height: auto;
+  min-height: 0;
+  padding: 22px 28px 24px;
+}
+
+.pipeline {
+  height: auto;
+  min-height: 0;
+}
+
+.pipeline-step {
+  height: auto;
 }

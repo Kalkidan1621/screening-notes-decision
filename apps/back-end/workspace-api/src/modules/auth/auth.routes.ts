@@ -12,6 +12,8 @@ import {
   adminCreateUserSchema,
   updateProfileSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from "./auth.schema.js";
 
 import {
@@ -24,6 +26,8 @@ import {
   updateProfilePhoto,
   updateProfile,
   changePassword,
+  requestPasswordReset,
+  resetPassword,
 } from "./auth.service.js";
 
 import {
@@ -31,6 +35,10 @@ import {
   requireRole,
   requirePermission,
 } from "./auth.middleware.js";
+
+import {
+  sendPasswordResetEmail,
+} from "../../services/email.js";
 
 const authRoutes = new Hono();
 
@@ -331,6 +339,116 @@ authRoutes.post(
               : "Login failed.",
         },
         401,
+      );
+    }
+  },
+);
+authRoutes.post(
+  "/forgot-password",
+  async (c) => {
+    try {
+      const body = await c.req.json();
+
+      const validation =
+        forgotPasswordSchema.safeParse(body);
+
+      if (!validation.success) {
+        return c.json(
+          {
+            success: false,
+            message:
+              validation.error.issues[0]?.message ??
+              "Invalid email address.",
+          },
+          400,
+        );
+      }
+
+      const result =
+        await requestPasswordReset(
+          validation.data.email,
+        );
+
+      if (result) {
+        await sendPasswordResetEmail(
+          result.email,
+          result.firstName,
+          result.token,
+        );
+      }
+
+      /*
+       * Always return the same response.
+       * This prevents account enumeration.
+       */
+      return c.json({
+        success: true,
+        message:
+          "If an account exists with that email, a password reset link has been sent.",
+      });
+    } catch (error) {
+      console.error(
+        "Forgot password error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            "Unable to process your password reset request.",
+        },
+        500,
+      );
+    }
+  },
+);
+authRoutes.post(
+  "/reset-password",
+  async (c) => {
+    try {
+      const body = await c.req.json();
+
+      const validation =
+        resetPasswordSchema.safeParse(body);
+
+      if (!validation.success) {
+        return c.json(
+          {
+            success: false,
+            message:
+              validation.error.issues[0]?.message ??
+              "Invalid password reset data.",
+          },
+          400,
+        );
+      }
+
+      await resetPassword(
+        validation.data.token,
+        validation.data.newPassword,
+      );
+
+      return c.json({
+        success: true,
+        message:
+          "Password reset successfully. You can now log in with your new password.",
+      });
+    } catch (error) {
+      console.error(
+        "Reset password error:",
+        error,
+      );
+
+      return c.json(
+        {
+          success: false,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to reset password.",
+        },
+        400,
       );
     }
   },

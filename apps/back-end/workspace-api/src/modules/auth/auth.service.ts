@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHash, } from "node:crypto";
 
 import { db } from "../../db/index.js";
 
@@ -10,6 +10,7 @@ import {
   sessions,
   permissions,
   rolePermissions,
+  passwordResetTokens,
 } from "../../db/schema.js";
 
 import type {
@@ -827,4 +828,149 @@ export async function changePassword(
     .where(eq(users.id, userId));
 
   return true;
+}
+export async function requestPasswordReset(
+  email: string,
+) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const [user] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+    })
+    .from(users)
+    .where(eq(users.email, normalizedEmail))
+    .limit(1);
+
+  /*
+   * Do not reveal whether an email exists.
+   */
+  if (!user) {
+    return;
+  }
+
+  /*
+   * Remove previous reset tokens for this user.
+   */
+  await db
+    .delete(passwordResetTokens)
+    .where(
+      eq(
+        passwordResetTokens.userId,
+        user.id,
+      ),
+    );
+
+  /*
+   * Generate a secure random token.
+   */
+  const rawToken = randomBytes(32).toString("hex");
+
+  /*
+   * Store only the hash in the database.
+   */
+  const tokenHash = createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  const expiresAt = new Date(
+    Date.now() + 30 * 60 * 1000,
+  );
+
+  await db.insert(passwordResetTokens).values({
+    userId: user.id,
+    tokenHash,
+    expiresAt,
+  });
+
+  /*
+   * Email sending will be connected in the next step.
+   */
+  return {
+    email: user.email,
+    firstName: user.firstName,
+    token: rawToken,
+  };
+}
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+) {
+  const tokenHash = createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const [resetToken] = await db
+    .select()
+    .from(passwordResetTokens)
+    .where(
+      eq(
+        passwordResetTokens.tokenHash,
+        tokenHash,
+      ),
+    )
+    .limit(1);
+
+  if (!resetToken) {
+    throw new Error(
+      "Invalid or expired password reset link.",
+    );
+  }
+
+  if (resetToken.usedAt) {
+    throw new Error(
+      "This password reset link has already been used.",
+    );
+  }
+
+  if (
+    resetToken.expiresAt.getTime() <=
+    Date.now()
+  ) {
+    throw new Error(
+      "This password reset link has expired.",
+    );
+  }
+
+  const passwordHash =
+    await bcrypt.hash(newPassword, 12);
+
+  await db
+    .update(users)
+    .set({
+      passwordHash,
+      updatedAt: new Date(),
+    })
+    .where(
+      eq(users.id, resetToken.userId),
+    );
+
+  /*
+   * Mark the reset token as used.
+   */
+  await db
+    .update(passwordResetTokens)
+    .set({
+      usedAt: new Date(),
+    })
+    .where(
+      eq(
+        passwordResetTokens.id,
+        resetToken.id,
+      ),
+    );
+
+  /*
+   * Invalidate all existing login sessions.
+   */
+  await db
+    .delete(sessions)
+    .where(
+      eq(
+        sessions.userId,
+        resetToken.userId,
+      ),
+    );
 }

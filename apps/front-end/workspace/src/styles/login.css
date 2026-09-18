@@ -113,3 +113,21 @@
     font-size: 28px;
   }
 }
+.forgot-password-link {
+display: flex;
+justify-content: flex-end;
+margin-top: -8px;
+}
+
+.forgot-password-link a {
+color: #111827;
+font-size: 14px;
+font-weight: 600;
+text-decoration: none;
+transition: color 0.2s ease;
+}
+
+.forgot-password-link a:hover {
+color: #4b5563;
+text-decoration: underline;
+}

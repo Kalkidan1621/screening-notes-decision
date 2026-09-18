@@ -2549,23 +2549,7 @@ function ApplicationPipeline({
 
       </div>
 
-      {(status === "on_hold" ||
-        status === "rejected") && (
-        <div className="pipeline-notice">
-
-          <strong>
-            {status === "on_hold"
-              ? "Application is on hold"
-              : "Application was rejected"}
-          </strong>
-
-          <span>
-            The hiring decision can be reviewed
-            again from the Hiring Decision tab.
-          </span>
-
-        </div>
-      )}
+      
 
     </section>
   );

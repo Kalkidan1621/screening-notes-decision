@@ -1,0 +1,94 @@
+import type { CreateApplicationInput } from "../schemas/applications.js";
+export declare function createApplication(data: CreateApplicationInput, candidateId: number): Promise<{
+    candidateId: number | null;
+    createdAt: Date;
+    email: string;
+    fullName: string;
+    id: number;
+    jobId: number;
+    phone: string;
+    resumeName: string;
+    resumePath: string | null;
+    resumeUrl: string | null;
+    status: string;
+    updatedAt: Date;
+} | undefined>;
+export declare function getApplicationsByJobId(jobId: number): Promise<{
+    id: number;
+    candidateId: number | null;
+    jobId: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    resumeName: string;
+    resumeUrl: string | null;
+    resumePath: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+}[]>;
+export declare function getApplicationById(applicationId: number): Promise<{
+    id: number;
+    jobId: number;
+    jobTitle: string | null;
+    fullName: string;
+    email: string;
+    phone: string;
+    resumeName: string;
+    resumeUrl: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+} | null>;
+export declare function getAllApplications(): Promise<{
+    id: number;
+    candidateId: number | null;
+    candidateFirstName: string | null;
+    candidateLastName: string | null;
+    candidateEmail: string | null;
+    jobId: number;
+    jobTitle: string | null;
+    fullName: string;
+    email: string;
+    phone: string;
+    resumeName: string;
+    resumeUrl: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+}[]>;
+export declare function updateApplicationStatus(applicationId: number, status: "approved" | "rejected"): Promise<{
+    id: number;
+    candidateId: number | null;
+    jobId: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    resumeName: string;
+    resumeUrl: string | null;
+    resumePath: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+} | null>;
+export declare function getApplicationStats(): Promise<{
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+}>;
+export declare function getApplicationsByCandidateId(candidateId: number): Promise<{
+    id: number;
+    candidateId: number | null;
+    jobId: number;
+    jobTitle: string | null;
+    fullName: string;
+    email: string;
+    phone: string;
+    resumeName: string;
+    resumeUrl: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+}[]>;
+//# sourceMappingURL=applications.d.ts.map

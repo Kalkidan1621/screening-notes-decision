@@ -226,3 +226,35 @@ export const changePasswordSchema = z
 export type ChangePasswordInput = z.infer<
   typeof changePasswordSchema
 >;
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address.")
+    .transform((value) => value.toLowerCase()),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    token: z
+      .string()
+      .trim()
+      .min(1, "Reset token is required."),
+
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters long.")
+      .max(100, "Password is too long."),
+
+    confirmPassword: z
+      .string()
+      .min(8, "Please confirm your password."),
+  })
+  .refine(
+    (data) => data.newPassword === data.confirmPassword,
+    {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    },
+  );

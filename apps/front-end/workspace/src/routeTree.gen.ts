@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAccountRouteImport } from './routes/admin/account'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
@@ -46,9 +48,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -172,7 +184,9 @@ const JobsJobIdApplyRoute = JobsJobIdApplyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/applications': typeof AdminApplicationsRouteWithChildren
   '/admin/profile': typeof AdminProfileRoute
@@ -199,7 +213,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/screening': typeof AdminScreeningRouteWithChildren
@@ -227,7 +243,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/account': typeof AdminAccountRoute
   '/admin/applications': typeof AdminApplicationsRouteWithChildren
   '/admin/profile': typeof AdminProfileRoute
@@ -257,7 +275,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/admin/account'
     | '/admin/applications'
     | '/admin/profile'
@@ -284,7 +304,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/admin/account'
     | '/admin/profile'
     | '/admin/screening'
@@ -311,7 +333,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/admin/account'
     | '/admin/applications'
     | '/admin/profile'
@@ -340,7 +364,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   CandidateApplicationsRoute: typeof CandidateApplicationsRoute
   CandidateLoginRoute: typeof CandidateLoginRoute
   CandidateProfileRoute: typeof CandidateProfileRoute
@@ -368,11 +394,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -597,7 +637,9 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   CandidateApplicationsRoute: CandidateApplicationsRoute,
   CandidateLoginRoute: CandidateLoginRoute,
   CandidateProfileRoute: CandidateProfileRoute,

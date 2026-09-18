@@ -1,0 +1,164 @@
+import { desc, eq, count } from "drizzle-orm";
+import { db } from "../db/index.js";
+import { applications, jobs, users, roles, } from "../db/schema.js";
+import cloudinary from "../config/cloudinary.js";
+export async function createApplication(data, candidateId) {
+    // Convert File to Buffer
+    const arrayBuffer = await data.resume.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    // Upload CV to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({
+            folder: "application/cv",
+            // IMPORTANT:
+            // CV is a PDF/raw file, not an image
+            resource_type: "raw",
+            public_id: `${Date.now()}-${data.resume.name.replace(/\.[^/.]+$/, "")}`,
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            }
+            else if (result) {
+                resolve({
+                    secure_url: result.secure_url,
+                    public_id: result.public_id,
+                });
+            }
+            else {
+                reject(new Error("Cloudinary upload failed."));
+            }
+        });
+        uploadStream.end(buffer);
+    });
+    // Save application + Cloudinary URL
+    const result = await db
+        .insert(applications)
+        .values({
+        candidateId,
+        jobId: data.jobId,
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        resumeName: data.resume.name,
+        resumeUrl: uploadResult.secure_url,
+        resumePath: uploadResult.public_id,
+    })
+        .returning();
+    return result[0];
+}
+export async function getApplicationsByJobId(jobId) {
+    return db
+        .select()
+        .from(applications)
+        .where(eq(applications.jobId, jobId))
+        .orderBy(desc(applications.createdAt));
+}
+export async function getApplicationById(applicationId) {
+    const result = await db
+        .select({
+        id: applications.id,
+        jobId: applications.jobId,
+        jobTitle: jobs.title,
+        fullName: applications.fullName,
+        email: applications.email,
+        phone: applications.phone,
+        resumeName: applications.resumeName,
+        resumeUrl: applications.resumeUrl,
+        status: applications.status,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt,
+    })
+        .from(applications)
+        .leftJoin(jobs, eq(applications.jobId, jobs.id))
+        .where(eq(applications.id, applicationId))
+        .limit(1);
+    return result[0] ?? null;
+}
+export async function getAllApplications() {
+    return db
+        .select({
+        id: applications.id,
+        candidateId: applications.candidateId,
+        candidateFirstName: users.firstName,
+        candidateLastName: users.lastName,
+        candidateEmail: users.email,
+        jobId: applications.jobId,
+        jobTitle: jobs.title,
+        fullName: applications.fullName,
+        email: applications.email,
+        phone: applications.phone,
+        resumeName: applications.resumeName,
+        resumeUrl: applications.resumeUrl,
+        status: applications.status,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt,
+    })
+        .from(applications)
+        .leftJoin(users, eq(applications.candidateId, users.id))
+        .leftJoin(jobs, eq(applications.jobId, jobs.id))
+        .orderBy(desc(applications.createdAt));
+}
+export async function updateApplicationStatus(applicationId, status) {
+    const result = await db
+        .update(applications)
+        .set({
+        status,
+        updatedAt: new Date(),
+    })
+        .where(eq(applications.id, applicationId))
+        .returning();
+    return result[0] ?? null;
+}
+export async function getApplicationStats() {
+    const totalResult = await db
+        .select({
+        count: count(),
+    })
+        .from(applications);
+    const pendingResult = await db
+        .select({
+        count: count(),
+    })
+        .from(applications)
+        .where(eq(applications.status, "pending"));
+    const approvedResult = await db
+        .select({
+        count: count(),
+    })
+        .from(applications)
+        .where(eq(applications.status, "approved"));
+    const rejectedResult = await db
+        .select({
+        count: count(),
+    })
+        .from(applications)
+        .where(eq(applications.status, "rejected"));
+    return {
+        total: totalResult[0]?.count ?? 0,
+        pending: pendingResult[0]?.count ?? 0,
+        approved: approvedResult[0]?.count ?? 0,
+        rejected: rejectedResult[0]?.count ?? 0,
+    };
+}
+export async function getApplicationsByCandidateId(candidateId) {
+    return db
+        .select({
+        id: applications.id,
+        candidateId: applications.candidateId,
+        jobId: applications.jobId,
+        jobTitle: jobs.title,
+        fullName: applications.fullName,
+        email: applications.email,
+        phone: applications.phone,
+        resumeName: applications.resumeName,
+        resumeUrl: applications.resumeUrl,
+        status: applications.status,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt,
+    })
+        .from(applications)
+        .leftJoin(jobs, eq(applications.jobId, jobs.id))
+        .where(eq(applications.candidateId, candidateId))
+        .orderBy(desc(applications.createdAt));
+}
+//# sourceMappingURL=applications.js.map
