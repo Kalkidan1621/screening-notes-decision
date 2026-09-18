@@ -8,7 +8,8 @@ import type {
   UsersResponse,
 } from "@/types/users";
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.API_URL || "http://localhost:3000";
+
 
 async function handleResponse<T>(
   response: Response,

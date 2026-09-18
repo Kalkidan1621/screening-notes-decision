@@ -1,5 +1,5 @@
-const API_URL =
-  "http://localhost:3000";
+const API_URL = import.meta.env.API_URL || "http://localhost:3000";
+
 
 export type InterviewStatus =
   | "scheduled"
