@@ -36,7 +36,7 @@ app.route("/hiring/decision", hiringDecisionRoutes);
 app.route("/api/employers", employerRoutes);
 app.route("/admin/users", userRoutes);
 
-const port = Number(process.env.PORT) || 3000;
+const port = 3000;
 
 serve({
   fetch: app.fetch,
