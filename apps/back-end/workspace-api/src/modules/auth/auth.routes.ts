@@ -303,7 +303,7 @@ authRoutes.post(
         {
           httpOnly: true,
 
-          secure: false,
+          secure: true,
 
           sameSite: "None",
 
