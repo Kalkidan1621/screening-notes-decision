@@ -305,12 +305,12 @@ authRoutes.post(
 
           secure: false,
 
-          sameSite: "Lax",
+          sameSite: "None",
 
           path: "/",
 
           maxAge:
-            7 * 24 * 60 * 60,
+            60 * 60 * 24 * 7,
         },
       );
 

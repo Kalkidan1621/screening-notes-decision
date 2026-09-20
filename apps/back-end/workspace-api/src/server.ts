@@ -21,7 +21,7 @@ const frontendUrl =
 app.use(
   "*",
   cors({
-    origin: frontendUrl,
+    origin: "https://screening-notes-decision.vercel.app",
     credentials: true,
   }),
 );
