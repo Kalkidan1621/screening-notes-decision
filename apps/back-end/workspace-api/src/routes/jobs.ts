@@ -115,10 +115,22 @@ jobsRouter.post(
       );
     }
 
-    const createdJob =
+        const createdJob =
       await createJob(
         result.data,
       );
+
+    if (!createdJob) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Job was not created successfully.",
+        },
+        500,
+      );
+    }
+
     await notifyNewJob(createdJob);
 
     return c.json(
