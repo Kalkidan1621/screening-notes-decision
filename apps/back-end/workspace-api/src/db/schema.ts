@@ -211,6 +211,38 @@ export const sessions = pgTable(
   },
 );
 
+export const telegramSubscribers = pgTable(
+  "telegram_subscribers",
+  {
+    id: serial("id").primaryKey(),
+
+    chatId: varchar("chat_id", {
+      length: 100,
+    })
+      .notNull()
+      .unique(),
+
+    telegramUsername: varchar(
+      "telegram_username",
+      {
+        length: 255,
+      },
+    ),
+
+    isSubscribed: boolean("is_subscribed")
+      .notNull()
+      .default(true),
+
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow(),
+  },
+)
+
 export const jobs = pgTable(
   "jobs",
   {

@@ -13,6 +13,8 @@ import {
   requirePermission,
 } from "../modules/auth/auth.middleware.js";
 
+import { notifyNewJob } from "../modules/telegram/telegram.notification.service.js";
+
 const jobsRouter = new Hono();
 
 // ================================
@@ -117,6 +119,7 @@ jobsRouter.post(
       await createJob(
         result.data,
       );
+    await notifyNewJob(createdJob);
 
     return c.json(
       {

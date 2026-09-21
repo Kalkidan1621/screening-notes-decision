@@ -12,6 +12,7 @@ import interviewRoutes from "./routes/interview/interview.routes.js";
 import hiringDecisionRoutes from "./routes/hiring-decision/hiring-decision.routes.js";
 import { employerRoutes } from "./modules/employer/employer.routes.js";
 import userRoutes from "./modules/users/user.routes.js";
+import { startTelegramBot } from "./modules/telegram/telegram.bot.js";
 
 const app = new Hono();
 
@@ -44,3 +45,7 @@ serve({
 });
 
 console.log(`Server running on port ${port}`);
+
+startTelegramBot().catch((error) => {
+  console.error("Failed to start Telegram bot:", error);
+});
