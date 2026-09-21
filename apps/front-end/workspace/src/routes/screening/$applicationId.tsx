@@ -197,6 +197,7 @@ function ScreeningPage() {
 
         <Link
           to="/admin/applications/$applicationId"
+          params={{applicationId}}
           className="back-button"
         >
           ← Back to Applications
