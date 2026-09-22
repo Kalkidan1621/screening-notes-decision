@@ -13,7 +13,14 @@ const openai = new OpenAI({
 
 const MODEL = "gpt-5.6-luna";
 
-export async function askTelegramAI(question: string): Promise<string> {
+export type TelegramAIResult = {
+  answer: string;
+  jobIds: number[];
+};
+
+export async function askTelegramAI(
+  question: string,
+): Promise<TelegramAIResult> {
   const jobs = await getActiveJobs();
 
   const jobContext = jobs
@@ -44,16 +51,20 @@ You are the AI assistant for a professional Job Portal Telegram bot.
 Your job is to help users understand and find currently available jobs.
 
 IMPORTANT RULES:
-1. Use the provided active-job data as the source of truth for job-specific information.
+1. Use only the provided active-job data as the source of truth for job-specific information.
 2. Never invent a job, employer, salary, requirement, location, or deadline.
-3. If the requested information is not available in the job data, clearly say that it is not available.
-4. You may give general career or application guidance when appropriate.
-5. Keep answers concise and easy to read on Telegram.
-6. When recommending jobs, explain briefly why they may match the user's stated background or preference.
+3. If the requested information is not available, clearly say so.
+4. You may provide general career and application guidance.
+5. Keep the answer concise and easy to read on Telegram.
+6. When recommending jobs, explain briefly why each job may match the user's question.
 7. Do not make hiring decisions.
 8. Do not claim that a user is guaranteed to get a job.
-9. If there are no matching jobs, say so clearly and suggest checking other available jobs.
-10. Use plain text. Do not use markdown tables.
+9. Only return job IDs that actually exist in the provided active-job data.
+10. If no job is relevant, return an empty jobIds array.
+11. Return ONLY valid JSON.
+12. The JSON must have exactly these fields:
+    - answer: string
+    - jobIds: number[]
     `.trim(),
     input: `
 CURRENT ACTIVE JOBS:
@@ -66,11 +77,46 @@ ${question}
     `.trim(),
   });
 
-  const answer = response.output_text?.trim();
+  const rawAnswer = response.output_text?.trim();
 
-  if (!answer) {
-    return "Sorry, I could not generate an answer right now. Please try again.";
+  if (!rawAnswer) {
+    return {
+      answer:
+        "Sorry, I could not generate an answer right now. Please try again.",
+      jobIds: [],
+    };
   }
 
-  return answer;
+  try {
+    const parsed = JSON.parse(rawAnswer) as TelegramAIResult;
+
+    const validJobIds = new Set(
+      jobs.map((job) => Number(job.id)),
+    );
+
+    const jobIds = Array.isArray(parsed.jobIds)
+      ? parsed.jobIds
+          .map(Number)
+          .filter((id) => validJobIds.has(id))
+      : [];
+
+    return {
+      answer:
+        typeof parsed.answer === "string" &&
+        parsed.answer.trim()
+          ? parsed.answer.trim()
+          : "I could not find a suitable answer.",
+      jobIds,
+    };
+  } catch (error) {
+    console.error(
+      "[Telegram AI] Failed to parse AI response:",
+      error,
+    );
+
+    return {
+      answer: rawAnswer,
+      jobIds: [],
+    };
+  }
 }

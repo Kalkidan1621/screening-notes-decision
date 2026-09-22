@@ -129,11 +129,32 @@ telegramBot.command("ai", async (ctx) => {
   try {
     await ctx.reply("🤖 Thinking...");
 
-    const answer = await askTelegramAI(question);
+    const result = await askTelegramAI(question);
 
-    await ctx.reply(answer);
+    await ctx.reply(result.answer);
+
+    if (result.jobIds.length > 0) {
+      for (const jobId of result.jobIds) {
+        const jobUrl = `${frontendUrl}/jobs/${jobId}`;
+
+        const keyboard = new InlineKeyboard().url(
+          "📄 View Job",
+          jobUrl,
+        );
+
+        await ctx.reply(
+          "📄 View this job for more details and to apply:",
+          {
+            reply_markup: keyboard,
+          },
+        );
+      }
+    }
   } catch (error) {
-    console.error("[Telegram AI] Failed to answer question:", error);
+    console.error(
+      "[Telegram AI] Failed to answer question:",
+      error,
+    );
 
     await ctx.reply(
       "Sorry, I could not answer your question right now. Please try again later.",
