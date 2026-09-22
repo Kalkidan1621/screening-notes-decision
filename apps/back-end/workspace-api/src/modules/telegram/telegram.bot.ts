@@ -227,15 +227,44 @@ telegramBot.command("jobs", async (ctx) => {
 telegramBot.on("message:text", async (ctx) => {
   const text = ctx.message.text.trim();
 
-  if (text.startsWith("/")) {
+  if (!text || text.startsWith("/")) {
     return;
   }
 
-  await ctx.reply(
-    "I received your message: " +
-      text +
-      "\n\nUse /ai to ask the AI assistant about available jobs.",
-  );
+  try {
+    await ctx.reply("🤖 Thinking...");
+
+    const result = await askTelegramAI(text);
+
+    await ctx.reply(result.answer);
+
+    if (result.jobIds.length > 0) {
+      for (const jobId of result.jobIds) {
+        const jobUrl = `${frontendUrl}/jobs/${jobId}`;
+
+        const keyboard = new InlineKeyboard().url(
+          "📄 View Job",
+          jobUrl,
+        );
+
+        await ctx.reply(
+          "📄 View this job for more details and to apply:",
+          {
+            reply_markup: keyboard,
+          },
+        );
+      }
+    }
+  } catch (error) {
+    console.error(
+      "[Telegram AI] Failed to answer message:",
+      error,
+    );
+
+    await ctx.reply(
+      "Sorry, I could not answer your question right now. Please try again later.",
+    );
+  }
 });
 
 export async function startTelegramBot() {
