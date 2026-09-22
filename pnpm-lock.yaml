@@ -237,6 +237,9 @@ importers:
       nodemailer:
         specifier: ^10.0.9
         version: 10.0.9
+      openai:
+        specifier: ^7.20.0
+        version: 7.20.0(undici@7.28.0)(ws@8.21.0)(zod@3.25.76)
       pg:
         specifier: ^8.16.0
         version: 8.22.0
@@ -2679,6 +2682,30 @@ packages:
   ocache@0.3.0:
     resolution: {integrity: sha512-RS/9P0zeBb0gDJmadGERLH8lZNXK7xbufTDhclkXGvFGTsj0G4M5/cLk+mizcERH29mLXNnocfB5wjcK70wGJg==}
 
+  openai@7.20.0:
+    resolution: {integrity: sha512-5x5ru4cKEvEqHqYZbdIbT57OE7KqmP9YYxZiUKuKng016grOHXqom1vmu34MTPPW30q+lcP9RhxAbaRse+Xlcw==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      '@aws-sdk/credential-provider-node': '>=3.972.0 <4'
+      '@smithy/hash-node': '>=4.3.0 <5'
+      '@smithy/signature-v4': '>=5.4.0 <6'
+      undici: '>=5 <9'
+      ws: ^8.21.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      '@aws-sdk/credential-provider-node':
+        optional: true
+      '@smithy/hash-node':
+        optional: true
+      '@smithy/signature-v4':
+        optional: true
+      undici:
+        optional: true
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   oxc-parser@0.120.0:
     resolution: {integrity: sha512-WyPWZlcIm+Fkte63FGfgFB8mAAk33aH9h5N9lphXVOHSXEBFFsmYdOBedVKly363aWABjZdaj/m9lBfEY4wt+w==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -5106,6 +5133,12 @@ snapshots:
   obug@2.1.3: {}
 
   ocache@0.3.0: {}
+
+  openai@7.20.0(undici@7.28.0)(ws@8.21.0)(zod@3.25.76):
+    optionalDependencies:
+      undici: 7.28.0
+      ws: 8.21.0
+      zod: 3.25.76
 
   oxc-parser@0.120.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1):
     dependencies:

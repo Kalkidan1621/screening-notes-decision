@@ -12,6 +12,8 @@ import {
   unsubscribeTelegramUser,
 } from "./telegram.subscriber.service.js";
 
+import { askTelegramAI } from "./telegram.ai.service.js";
+
 
 telegramBot.command("start", async (ctx) => {
   const keyboard = new InlineKeyboard()
@@ -104,11 +106,46 @@ telegramBot.callbackQuery(
     );
   },
 );
+telegramBot.command("ai", async (ctx) => {
+  const question = ctx.match.trim();
+
+  if (!question) {
+    await ctx.reply(
+      [
+        "🤖 AI Job Assistant",
+        "",
+        "Ask me anything about available jobs.",
+        "",
+        "Examples:",
+        "/ai What jobs are available in Addis Ababa?",
+        "/ai What are the requirements for Accountant?",
+        "/ai I have a bachelor's degree in accounting and 2 years experience. Which jobs match me?",
+      ].join("\n"),
+    );
+
+    return;
+  }
+
+  try {
+    await ctx.reply("🤖 Thinking...");
+
+    const answer = await askTelegramAI(question);
+
+    await ctx.reply(answer);
+  } catch (error) {
+    console.error("[Telegram AI] Failed to answer question:", error);
+
+    await ctx.reply(
+      "Sorry, I could not answer your question right now. Please try again later.",
+    );
+  }
+});
 telegramBot.command("help", async (ctx) => {
   await ctx.reply(
     "🤖 Job Portal Assistant\n\n" +
       "/start - Start the bot\n" +
       "/jobs - View available jobs\n" +
+      "/ai - Ask the AI assistant about jobs\n" +
       "/help - Show help",
   );
 });
@@ -167,10 +204,16 @@ telegramBot.command("jobs", async (ctx) => {
 });
 
 telegramBot.on("message:text", async (ctx) => {
+  const text = ctx.message.text.trim();
+
+  if (text.startsWith("/")) {
+    return;
+  }
+
   await ctx.reply(
     "I received your message: " +
-      ctx.message.text +
-      "\n\nUse /jobs to see available jobs.",
+      text +
+      "\n\nUse /ai to ask the AI assistant about available jobs.",
   );
 });
 
