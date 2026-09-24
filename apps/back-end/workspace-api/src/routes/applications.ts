@@ -305,6 +305,208 @@ applicationsRouter.get(
 );
 
 // ================================
+// VIEW APPLICATION CV
+// Authenticated users with applications.read
+// ================================
+
+applicationsRouter.get(
+  "/:id/cv",
+  requireAuth,
+  requirePermission(
+    "applications.read",
+  ),
+  async (c) => {
+    const id = Number(
+      c.req.param("id"),
+    );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Invalid application ID.",
+        },
+        400,
+      );
+    }
+
+    const application =
+      await getApplicationById(id);
+
+    if (!application) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Application not found.",
+        },
+        404,
+      );
+    }
+
+    if (!application.resumeUrl) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "CV not found for this application.",
+        },
+        404,
+      );
+    }
+
+    const cvResponse =
+      await fetch(
+        application.resumeUrl,
+      );
+
+    if (!cvResponse.ok) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Unable to retrieve CV.",
+        },
+        502,
+      );
+    }
+
+    const contentType =
+      cvResponse.headers.get(
+        "content-type",
+      ) ||
+      "application/octet-stream";
+
+    c.header(
+      "Content-Type",
+      contentType,
+    );
+
+    c.header(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(
+        application.resumeName ||
+          "resume",
+      )}"`,
+    );
+
+    return new Response(
+      cvResponse.body,
+      {
+        status: 200,
+        headers: c.res.headers,
+      },
+    );
+  },
+);
+
+
+// ================================
+// DOWNLOAD APPLICATION CV
+// Authenticated users with applications.read
+// ================================
+
+applicationsRouter.get(
+  "/:id/cv/download",
+  requireAuth,
+  requirePermission(
+    "applications.read",
+  ),
+  async (c) => {
+    const id = Number(
+      c.req.param("id"),
+    );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Invalid application ID.",
+        },
+        400,
+      );
+    }
+
+    const application =
+      await getApplicationById(id);
+
+    if (!application) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Application not found.",
+        },
+        404,
+      );
+    }
+
+    if (!application.resumeUrl) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "CV not found for this application.",
+        },
+        404,
+      );
+    }
+
+    const cvResponse =
+      await fetch(
+        application.resumeUrl,
+      );
+
+    if (!cvResponse.ok) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "Unable to retrieve CV.",
+        },
+        502,
+      );
+    }
+
+    const contentType =
+      cvResponse.headers.get(
+        "content-type",
+      ) ||
+      "application/octet-stream";
+
+    c.header(
+      "Content-Type",
+      contentType,
+    );
+
+    c.header(
+      "Content-Disposition",
+      `attachment; filename="${encodeURIComponent(
+        application.resumeName ||
+          "resume",
+      )}"`,
+    );
+
+    return new Response(
+      cvResponse.body,
+      {
+        status: 200,
+        headers: c.res.headers,
+      },
+    );
+  },
+);
+
+
+// ================================
 // GET APPLICATION BY ID
 // ================================
 

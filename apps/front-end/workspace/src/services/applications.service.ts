@@ -388,3 +388,122 @@ export async function getApplicationStats(): Promise<ApplicationStatsResponse> {
 
   return result as ApplicationStatsResponse;
 }
+// ========================================
+// GET APPLICATION CV FOR PREVIEW
+// ========================================
+
+export async function getApplicationCvUrl(
+  applicationId: number,
+): Promise<string> {
+  if (
+    !Number.isInteger(applicationId) ||
+    applicationId <= 0
+  ) {
+    throw new Error(
+      "Invalid application ID.",
+    );
+  }
+
+  const response = await fetch(
+    `${API_URL}/applications/${applicationId}/cv`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    let message =
+      "Failed to load CV.";
+
+    try {
+      const result =
+        await response.json();
+
+      if (
+        result &&
+        typeof result.message ===
+          "string"
+      ) {
+        message = result.message;
+      }
+    } catch {
+      // Keep default message.
+    }
+
+    throw new Error(message);
+  }
+
+  const blob =
+    await response.blob();
+
+  return URL.createObjectURL(blob);
+}
+
+
+// ========================================
+// DOWNLOAD APPLICATION CV
+// ========================================
+
+export async function downloadApplicationCv(
+  applicationId: number,
+  fileName: string,
+): Promise<void> {
+  if (
+    !Number.isInteger(applicationId) ||
+    applicationId <= 0
+  ) {
+    throw new Error(
+      "Invalid application ID.",
+    );
+  }
+
+  const response = await fetch(
+    `${API_URL}/applications/${applicationId}/cv/download`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    let message =
+      "Failed to download CV.";
+
+    try {
+      const result =
+        await response.json();
+
+      if (
+        result &&
+        typeof result.message ===
+          "string"
+      ) {
+        message = result.message;
+      }
+    } catch {
+      // Keep default message.
+    }
+
+    throw new Error(message);
+  }
+
+  const blob =
+    await response.blob();
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+  link.download =
+    fileName || "resume";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}

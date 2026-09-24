@@ -12,6 +12,8 @@ import {
 
 import {
   getApplicationById,
+  getApplicationCvUrl,
+  downloadApplicationCv,
 } from "@/services/applications.service";
 
 import type {
@@ -2565,16 +2567,91 @@ function ResumeCard({
 }: {
   application: Application;
 }) {
+  const [viewLoading, setViewLoading] =
+    useState(false);
+
+  const [downloadLoading, setDownloadLoading] =
+    useState(false);
+
+  const handleViewCv = async () => {
+    if (viewLoading) {
+      return;
+    }
+
+    setViewLoading(true);
+
+    try {
+      const url =
+        await getApplicationCvUrl(
+          application.id,
+        );
+
+      window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer",
+      );
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 60_000);
+    } catch (error) {
+      console.error(
+        "Failed to view CV:",
+        error,
+      );
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to open CV.",
+      );
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  const handleDownloadCv = async () => {
+    if (downloadLoading) {
+      return;
+    }
+
+    setDownloadLoading(true);
+
+    try {
+      await downloadApplicationCv(
+        application.id,
+        application.resumeName ||
+          "resume",
+      );
+    } catch (error) {
+      console.error(
+        "Failed to download CV:",
+        error,
+      );
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to download CV.",
+      );
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
+  if (!application.resumeUrl) {
+    return null;
+  }
+
   return (
     <section className="content-card resume-card">
-
       <CardHeader
         eyebrow="RESUME"
         title="Candidate CV"
       />
 
       <div className="resume-file">
-
         <div className="resume-file-icon">
           PDF
         </div>
@@ -2589,20 +2666,31 @@ function ResumeCard({
             Candidate uploaded resume
           </span>
         </div>
-
       </div>
 
-      {application.resumeUrl && (
-        <a
-          href={application.resumeUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-secondary full-width"
+      <div className="resume-actions">
+        <button
+          type="button"
+          onClick={handleViewCv}
+          disabled={viewLoading}
+          className="btn btn-secondary"
         >
-          View / Download CV
-        </a>
-      )}
+          {viewLoading
+            ? "Opening..."
+            : "View CV"}
+        </button>
 
+        <button
+          type="button"
+          onClick={handleDownloadCv}
+          disabled={downloadLoading}
+          className="btn btn-primary"
+        >
+          {downloadLoading
+            ? "Downloading..."
+            : "Download CV"}
+        </button>
+      </div>
     </section>
   );
 }

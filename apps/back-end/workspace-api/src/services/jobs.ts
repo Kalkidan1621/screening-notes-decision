@@ -28,6 +28,11 @@ export async function createJob(
       status: data.status,
     })
     .returning();
+    if (!result[0]) {
+  throw new Error(
+    "Job was not created successfully.",
+  );
+}
 
   return result[0];
 }

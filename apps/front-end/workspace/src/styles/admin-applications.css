@@ -672,6 +672,15 @@
   height: 100%;
   border: 0;
 }
+.resume-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.resume-actions .btn {
+  flex: 1;
+}
 
 /* =========================================================
    SCREENING
