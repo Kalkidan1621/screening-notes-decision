@@ -28,7 +28,7 @@ export async function createApplication(
 
         // IMPORTANT:
         // CV is a PDF/raw file, not an image
-        resource_type: "raw",
+        resource_type: "image",
 
         public_id: `${Date.now()}-${data.resume.name.replace(
           /\.[^/.]+$/,
