@@ -32,6 +32,7 @@ telegramBot.command("start", async (ctx) => {
   );
 });
 
+
 telegramBot.callbackQuery(
   "subscribe_jobs",
   async (ctx) => {
@@ -66,6 +67,7 @@ telegramBot.callbackQuery(
   },
 );
 
+
 telegramBot.callbackQuery(
   "unsubscribe_jobs",
   async (ctx) => {
@@ -96,6 +98,7 @@ telegramBot.callbackQuery(
   },
 );
 
+
 telegramBot.callbackQuery(
   "view_jobs",
   async (ctx) => {
@@ -106,6 +109,8 @@ telegramBot.callbackQuery(
     );
   },
 );
+
+
 telegramBot.command("ai", async (ctx) => {
   const question = ctx.match.trim();
 
@@ -131,24 +136,48 @@ telegramBot.command("ai", async (ctx) => {
 
     const result = await askTelegramAI(question);
 
-    await ctx.reply(result.answer);
-
+    /*
+     * If the AI found matching jobs, send each job
+     * with its own View Job button.
+     */
     if (result.jobIds.length > 0) {
-      for (const jobId of result.jobIds) {
-        const jobUrl = `${frontendUrl}/jobs/${jobId}`;
+      const jobs = await getActiveJobs();
 
-        const keyboard = new InlineKeyboard().url(
-          "📄 View Job",
-          jobUrl,
-        );
+      const matchingJobs = jobs.filter((job) =>
+        result.jobIds.includes(Number(job.id)),
+      );
+
+      /*
+       * Send the AI introduction first.
+       */
+      await ctx.reply(
+        result.answer,
+      );
+
+      /*
+       * Send each matching job with its own button.
+       */
+      for (const job of matchingJobs) {
+        const jobUrl =
+          `${frontendUrl}/jobs/${job.id}`;
+
+        const keyboard = new InlineKeyboard()
+          .url("📄 View Job", jobUrl);
 
         await ctx.reply(
-          "📄 View this job for more details and to apply:",
+          [
+            `💼 ${job.title}`,
+            ` ${job.employer}`,
+            ` ${job.location}`,
+            ` ${job.salary}`,
+          ].join("\n"),
           {
             reply_markup: keyboard,
           },
         );
       }
+    } else {
+      await ctx.reply(result.answer);
     }
   } catch (error) {
     console.error(
@@ -161,6 +190,8 @@ telegramBot.command("ai", async (ctx) => {
     );
   }
 });
+
+
 telegramBot.command("help", async (ctx) => {
   await ctx.reply(
     "🤖 Job Portal Assistant\n\n" +
@@ -170,6 +201,7 @@ telegramBot.command("help", async (ctx) => {
       "/help - Show help",
   );
 });
+
 
 telegramBot.command("jobs", async (ctx) => {
   try {
@@ -197,15 +229,15 @@ telegramBot.command("jobs", async (ctx) => {
         [
           `💼 ${job.title}`,
           "",
-          `Employer: ${job.employer}`,
-          `Location: ${job.location}`,
-          `Type: ${job.employmentType}`,
-          `Working Time: ${job.workingTime}`,
-          `Experience: ${job.experience}`,
-          `Education: ${job.educationalQualification}`,
-          `Salary: ${job.salary}`,
+          ` Employer: ${job.employer}`,
+          ` Location: ${job.location}`,
+          ` Type: ${job.employmentType}`,
+          ` Working Time: ${job.workingTime}`,
+          ` Experience: ${job.experience}`,
+          ` Education: ${job.educationalQualification}`,
+          ` Salary: ${job.salary}`,
           "",
-          `Closing Date: ${job.closingDate}`,
+          `📅 Closing Date: ${job.closingDate}`,
         ].join("\n"),
         {
           reply_markup: keyboard,
@@ -224,6 +256,7 @@ telegramBot.command("jobs", async (ctx) => {
   }
 });
 
+
 telegramBot.on("message:text", async (ctx) => {
   const text = ctx.message.text.trim();
 
@@ -236,24 +269,46 @@ telegramBot.on("message:text", async (ctx) => {
 
     const result = await askTelegramAI(text);
 
-    await ctx.reply(result.answer);
+    /*
+     * Get the actual active jobs from the database.
+     */
+    const jobs = await getActiveJobs();
 
-    if (result.jobIds.length > 0) {
-      for (const jobId of result.jobIds) {
-        const jobUrl = `${frontendUrl}/jobs/${jobId}`;
+    /*
+     * Keep only the jobs returned by the AI.
+     */
+    const matchingJobs = jobs.filter((job) =>
+      result.jobIds.includes(Number(job.id)),
+    );
 
-        const keyboard = new InlineKeyboard().url(
-          "📄 View Job",
-          jobUrl,
-        );
+    /*
+     * If there are matching jobs, show the AI answer
+     * followed by each job and its own View Job button.
+     */
+    if (matchingJobs.length > 0) {
+      await ctx.reply(result.answer);
+
+      for (const job of matchingJobs) {
+        const jobUrl =
+          `${frontendUrl}/jobs/${job.id}`;
+
+        const keyboard = new InlineKeyboard()
+          .url("📄 View Job", jobUrl);
 
         await ctx.reply(
-          "📄 View this job for more details and to apply:",
+          [
+            `💼 ${job.title}`,
+            ` ${job.employer}`,
+            ` ${job.location}`,
+            ` ${job.salary}`,
+          ].join("\n"),
           {
             reply_markup: keyboard,
           },
         );
       }
+    } else {
+      await ctx.reply(result.answer);
     }
   } catch (error) {
     console.error(
@@ -266,6 +321,7 @@ telegramBot.on("message:text", async (ctx) => {
     );
   }
 });
+
 
 export async function startTelegramBot() {
   await telegramBot.start({

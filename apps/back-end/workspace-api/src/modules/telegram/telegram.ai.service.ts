@@ -1,17 +1,17 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import { getActiveJobs } from "../../services/jobs.js";
 
-const apiKey = process.env.OPENAI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-  throw new Error("OPENAI_API_KEY is not configured");
+  throw new Error("GEMINI_API_KEY is not configured");
 }
 
-const openai = new OpenAI({
+const ai = new GoogleGenAI({
   apiKey,
 });
 
-const MODEL = "gpt-5.6-luna";
+const MODEL = "gemini-3.8-flash";
 
 export type TelegramAIResult = {
   answer: string;
@@ -43,9 +43,7 @@ export async function askTelegramAI(
     })
     .join("\n\n---\n\n");
 
-  const response = await openai.responses.create({
-    model: MODEL,
-    instructions: `
+  const prompt = `
 You are the AI assistant for a professional Job Portal Telegram bot.
 
 Your job is to help users understand and find currently available jobs.
@@ -65,8 +63,7 @@ IMPORTANT RULES:
 12. The JSON must have exactly these fields:
     - answer: string
     - jobIds: number[]
-    `.trim(),
-    input: `
+
 CURRENT ACTIVE JOBS:
 
 ${jobContext || "There are currently no active jobs."}
@@ -74,48 +71,99 @@ ${jobContext || "There are currently no active jobs."}
 USER QUESTION:
 
 ${question}
-    `.trim(),
-  });
-
-  const rawAnswer = response.output_text?.trim();
-
-  if (!rawAnswer) {
-    return {
-      answer:
-        "Sorry, I could not generate an answer right now. Please try again.",
-      jobIds: [],
-    };
-  }
+`.trim();
 
   try {
-    const parsed = JSON.parse(rawAnswer) as TelegramAIResult;
+    let response;
 
-    const validJobIds = new Set(
-      jobs.map((job) => Number(job.id)),
+for (let attempt = 1; attempt <= 3; attempt++) {
+  try {
+    response = await ai.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    break;
+  } catch (error) {
+    const status =
+      typeof error === "object" &&
+      error !== null &&
+      "status" in error
+        ? Number((error as { status?: unknown }).status)
+        : undefined;
+
+    if (status !== 503 || attempt === 3) {
+      throw error;
+    }
+
+    console.warn(
+      `[Telegram AI] Gemini temporarily unavailable. Retrying (${attempt}/3)...`,
     );
 
-    const jobIds = Array.isArray(parsed.jobIds)
-      ? parsed.jobIds
-          .map(Number)
-          .filter((id) => validJobIds.has(id))
-      : [];
+    await new Promise((resolve) =>
+      setTimeout(resolve, attempt * 2000),
+    );
+  }
+}
 
-    return {
-      answer:
-        typeof parsed.answer === "string" &&
-        parsed.answer.trim()
-          ? parsed.answer.trim()
-          : "I could not find a suitable answer.",
-      jobIds,
-    };
+if (!response) {
+  throw new Error("Gemini did not return a response");
+}
+
+    const rawAnswer = response.text?.trim();
+
+    if (!rawAnswer) {
+      return {
+        answer:
+          "Sorry, I could not generate an answer right now. Please try again.",
+        jobIds: [],
+      };
+    }
+
+    try {
+      const parsed = JSON.parse(rawAnswer) as TelegramAIResult;
+
+      const validJobIds = new Set(
+        jobs.map((job) => Number(job.id)),
+      );
+
+      const jobIds = Array.isArray(parsed.jobIds)
+        ? parsed.jobIds
+            .map(Number)
+            .filter((id) => validJobIds.has(id))
+        : [];
+
+      return {
+        answer:
+          typeof parsed.answer === "string" &&
+          parsed.answer.trim()
+            ? parsed.answer.trim()
+            : "I could not find a suitable answer.",
+        jobIds,
+      };
+    } catch (error) {
+      console.error(
+        "[Telegram AI] Failed to parse Gemini response:",
+        error,
+      );
+
+      return {
+        answer: rawAnswer,
+        jobIds: [],
+      };
+    }
   } catch (error) {
     console.error(
-      "[Telegram AI] Failed to parse AI response:",
+      "[Telegram AI] Failed to answer message:",
       error,
     );
 
     return {
-      answer: rawAnswer,
+      answer:
+        "Sorry, I could not answer your question right now. Please try again later.",
       jobIds: [],
     };
   }

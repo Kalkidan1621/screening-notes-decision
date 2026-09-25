@@ -12,6 +12,8 @@
     "seed:super-admin": "tsx src/db/seed-super-admin.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
+    "@google/generative-ai": "^0.24.1",
     "@hono/node-server": "^1.19.14",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
