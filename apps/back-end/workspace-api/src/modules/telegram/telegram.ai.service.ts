@@ -11,12 +11,77 @@ const ai = new GoogleGenAI({
   apiKey,
 });
 
-const MODEL = "gemini-3.8-flash";
+const PRIMARY_MODEL = "gemini-3.8-flash";
+const FALLBACK_MODEL = "gemini-3.5-flash-lite";
 
 export type TelegramAIResult = {
   answer: string;
   jobIds: number[];
 };
+
+function getStatus(error: unknown): number | undefined {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error
+  ) {
+    return Number(
+      (error as { status?: unknown }).status,
+    );
+  }
+
+  return undefined;
+}
+
+async function generateWithRetry(
+  model: string,
+  prompt: string,
+): Promise<string> {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+        },
+      });
+
+      const rawAnswer = response.text?.trim();
+
+      if (!rawAnswer) {
+        throw new Error(
+          `Gemini returned an empty response using ${model}`,
+        );
+      }
+
+      return rawAnswer;
+    } catch (error) {
+      const status = getStatus(error);
+
+      if (status !== 503 || attempt === maxAttempts) {
+        throw error;
+      }
+
+      const delay = attempt * 3000;
+
+      console.warn(
+        `[Telegram AI] ${model} temporarily unavailable. ` +
+          `Retrying in ${delay / 1000}s (${attempt}/${maxAttempts})...`,
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, delay),
+      );
+    }
+  }
+
+  throw new Error(
+    `Gemini did not return a response using ${model}`,
+  );
+}
 
 export async function askTelegramAI(
   question: string,
@@ -74,57 +139,36 @@ ${question}
 `.trim();
 
   try {
-    let response;
+    let rawAnswer: string;
 
-for (let attempt = 1; attempt <= 3; attempt++) {
-  try {
-    response = await ai.models.generateContent({
-      model: MODEL,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      },
-    });
+    try {
+      console.log(
+        `[Telegram AI] Trying primary model: ${PRIMARY_MODEL}`,
+      );
 
-    break;
-  } catch (error) {
-    const status =
-      typeof error === "object" &&
-      error !== null &&
-      "status" in error
-        ? Number((error as { status?: unknown }).status)
-        : undefined;
+      rawAnswer = await generateWithRetry(
+        PRIMARY_MODEL,
+        prompt,
+      );
+    } catch (primaryError) {
+      const primaryStatus = getStatus(primaryError);
 
-    if (status !== 503 || attempt === 3) {
-      throw error;
-    }
+      console.warn(
+        `[Telegram AI] Primary model failed ` +
+          `(status: ${primaryStatus ?? "unknown"}). ` +
+          `Trying fallback model: ${FALLBACK_MODEL}`,
+      );
 
-    console.warn(
-      `[Telegram AI] Gemini temporarily unavailable. Retrying (${attempt}/3)...`,
-    );
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, attempt * 2000),
-    );
-  }
-}
-
-if (!response) {
-  throw new Error("Gemini did not return a response");
-}
-
-    const rawAnswer = response.text?.trim();
-
-    if (!rawAnswer) {
-      return {
-        answer:
-          "Sorry, I could not generate an answer right now. Please try again.",
-        jobIds: [],
-      };
+      rawAnswer = await generateWithRetry(
+        FALLBACK_MODEL,
+        prompt,
+      );
     }
 
     try {
-      const parsed = JSON.parse(rawAnswer) as TelegramAIResult;
+      const parsed = JSON.parse(
+        rawAnswer,
+      ) as TelegramAIResult;
 
       const validJobIds = new Set(
         jobs.map((job) => Number(job.id)),
@@ -157,13 +201,13 @@ if (!response) {
     }
   } catch (error) {
     console.error(
-      "[Telegram AI] Failed to answer message:",
+      "[Telegram AI] All Gemini models failed:",
       error,
     );
 
     return {
       answer:
-        "Sorry, I could not answer your question right now. Please try again later.",
+        "🤖 The AI assistant is temporarily unavailable. Please try again shortly.",
       jobIds: [],
     };
   }
