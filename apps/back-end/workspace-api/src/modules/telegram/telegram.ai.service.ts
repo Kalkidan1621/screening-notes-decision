@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+
 import { getActiveJobs } from "../../services/jobs.js";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -19,7 +20,316 @@ export type TelegramAIResult = {
   jobIds: number[];
 };
 
-function getStatus(error: unknown): number | undefined {
+/**
+ * Extract user's years of experience from natural language.
+ *
+ * Examples:
+ * "2 years experience" -> 2
+ * "I have 3 years of experience" -> 3
+ * "with 1.5 years experience" -> 1.5
+ */
+function extractYearsOfExperience(
+  question: string,
+): number | null {
+  const match = question.match(
+    /(\d+(?:\.\d+)?)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience)?/i,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const years = Number(match[1]);
+
+  return Number.isFinite(years) ? years : null;
+}
+
+/**
+ * Normalize experience text.
+ */
+function normalizeExperience(
+  experience: string,
+): string {
+  return experience
+    .toLowerCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Check whether user's experience satisfies
+ * the job's stated experience requirement.
+ */
+function experienceMatches(
+  userYears: number,
+  requirement: string,
+): boolean {
+  const normalized = normalizeExperience(requirement);
+
+  // Fresh Graduate
+  if (
+    normalized.includes("fresh graduate") ||
+    normalized.includes("freshgraduate")
+  ) {
+    return userYears === 0;
+  }
+
+  // No experience
+  if (
+    normalized === "no experience" ||
+    normalized.includes("no experience required") ||
+    normalized.includes("no experience needed")
+  ) {
+    return userYears === 0;
+  }
+
+  // Range: 0-1, 1-2, 2-3, 3-5, etc.
+  const rangeMatch = normalized.match(
+    /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/,
+  );
+
+  if (rangeMatch) {
+    const min = Number(rangeMatch[1]);
+    const max = Number(rangeMatch[2]);
+
+    return userYears >= min && userYears <= max;
+  }
+
+  // 2+, 3+, etc.
+  const plusMatch = normalized.match(
+    /(\d+(?:\.\d+)?)\s*\+/,
+  );
+
+  if (plusMatch) {
+    const minimum = Number(plusMatch[1]);
+
+    return userYears >= minimum;
+  }
+
+  // "2 years" exactly
+  const exactMatch = normalized.match(
+    /(\d+(?:\.\d+)?)\s*(?:years?|yrs?)/,
+  );
+
+  if (exactMatch) {
+    const requiredYears = Number(exactMatch[1]);
+
+    return userYears === requiredYears;
+  }
+
+  return false;
+}
+
+/**
+ * Extract likely education/degree information from
+ * the user's question.
+ */
+function extractEducation(
+  question: string,
+): string {
+  const normalized = question.toLowerCase();
+
+  const educationKeywords = [
+    "accounting",
+    "accountancy",
+    "finance",
+    "financial management",
+    "computer science",
+    "computer engineering",
+    "software engineering",
+    "information technology",
+    "information systems",
+    "business administration",
+    "business management",
+    "marketing",
+    "human resource",
+    "human resources",
+    "hr",
+    "economics",
+    "management",
+    "statistics",
+    "mathematics",
+    "engineering",
+  ];
+
+  const found = educationKeywords.filter((keyword) =>
+    normalized.includes(keyword),
+  );
+
+  return found.join(" ");
+}
+
+/**
+ * Check whether the job explicitly accepts the user's
+ * education.
+ *
+ * We intentionally use the DB educational qualification
+ * text instead of the job title.
+ */
+function educationMatches(
+  userEducation: string,
+  jobEducation: string,
+): boolean {
+  if (!userEducation.trim()) {
+    return false;
+  }
+
+  const user = userEducation.toLowerCase();
+  const job = jobEducation.toLowerCase();
+
+  const educationAliases: Record<
+    string,
+    string[]
+  > = {
+    accounting: [
+      "accounting",
+      "accountancy",
+    ],
+
+    accountancy: [
+      "accounting",
+      "accountancy",
+    ],
+
+    finance: [
+      "finance",
+      "financial management",
+      "accounting",
+      "accountancy",
+    ],
+
+    "financial management": [
+      "finance",
+      "financial management",
+      "accounting",
+      "accountancy",
+    ],
+
+    "computer science": [
+      "computer science",
+      "software engineering",
+      "computer engineering",
+    ],
+
+    "software engineering": [
+      "software engineering",
+      "computer science",
+      "computer engineering",
+    ],
+
+    "computer engineering": [
+      "computer engineering",
+      "computer science",
+      "software engineering",
+    ],
+
+    "information technology": [
+      "information technology",
+      "information systems",
+      "computer science",
+    ],
+
+    "information systems": [
+      "information systems",
+      "information technology",
+      "computer science",
+    ],
+
+    "business administration": [
+      "business administration",
+      "business management",
+    ],
+
+    "business management": [
+      "business management",
+      "business administration",
+    ],
+
+    "human resource": [
+      "human resource",
+      "human resources",
+      "hr",
+    ],
+
+    "human resources": [
+      "human resource",
+      "human resources",
+      "hr",
+    ],
+
+    "hr": [
+      "human resource",
+      "human resources",
+      "hr",
+    ],
+
+    marketing: [
+      "marketing",
+      "business administration",
+      "business management",
+    ],
+
+    economics: [
+      "economics",
+      "finance",
+      "accounting",
+    ],
+
+    management: [
+      "management",
+      "business administration",
+      "business management",
+    ],
+
+    statistics: [
+      "statistics",
+      "mathematics",
+      "data science",
+    ],
+
+    mathematics: [
+      "mathematics",
+      "statistics",
+      "data science",
+    ],
+  };
+
+  const possibleMatches = new Set<string>();
+
+  for (const keyword of Object.keys(
+  educationAliases,
+)) {
+  if (user.includes(keyword)) {
+    const aliases =
+      educationAliases[keyword];
+
+    if (!aliases) {
+      continue;
+    }
+
+    for (const alias of aliases) {
+      possibleMatches.add(alias);
+    }
+  }
+}
+
+  if (possibleMatches.size === 0) {
+    return job.includes(user.trim());
+  }
+
+  for (const acceptedEducation of possibleMatches) {
+    if (job.includes(acceptedEducation)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getStatus(
+  error: unknown,
+): number | undefined {
   if (
     typeof error === "object" &&
     error !== null &&
@@ -39,17 +349,23 @@ async function generateWithRetry(
 ): Promise<string> {
   const maxAttempts = 3;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ) {
     try {
-      const response = await ai.models.generateContent({
-        model,
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
+      const response =
+        await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+          },
+        });
 
-      const rawAnswer = response.text?.trim();
+      const rawAnswer =
+        response.text?.trim();
 
       if (!rawAnswer) {
         throw new Error(
@@ -61,7 +377,10 @@ async function generateWithRetry(
     } catch (error) {
       const status = getStatus(error);
 
-      if (status !== 503 || attempt === maxAttempts) {
+      if (
+        status !== 503 ||
+        attempt === maxAttempts
+      ) {
         throw error;
       }
 
@@ -69,7 +388,8 @@ async function generateWithRetry(
 
       console.warn(
         `[Telegram AI] ${model} temporarily unavailable. ` +
-          `Retrying in ${delay / 1000}s (${attempt}/${maxAttempts})...`,
+          `Retrying in ${delay / 1000}s ` +
+          `(${attempt}/${maxAttempts})...`,
       );
 
       await new Promise((resolve) =>
@@ -88,9 +408,182 @@ export async function askTelegramAI(
 ): Promise<TelegramAIResult> {
   const jobs = await getActiveJobs();
 
+  const userYears =
+    extractYearsOfExperience(question);
+
+  const userEducation =
+    extractEducation(question);
+
+  console.log(
+    "[Telegram AI] User education:",
+    userEducation || "not detected",
+  );
+
+  console.log(
+    "[Telegram AI] User experience:",
+    userYears ?? "not detected",
+  );
+
+  /**
+   * If the user provided both education and experience,
+   * perform deterministic DB matching.
+   */
+  if (
+    userEducation &&
+    userYears !== null
+  ) {
+    const matchingJobs = jobs.filter((job) => {
+      const educationMatch =
+        educationMatches(
+          userEducation,
+          String(
+            job.educationalQualification ?? "",
+          ),
+        );
+
+      const experienceMatch =
+        experienceMatches(
+          userYears,
+          String(job.experience ?? ""),
+        );
+
+      console.log(
+        `[Telegram AI] Job ${job.id} "${job.title}"`,
+        {
+          education:
+            job.educationalQualification,
+          experience: job.experience,
+          educationMatch,
+          experienceMatch,
+        },
+      );
+
+      return (
+        educationMatch &&
+        experienceMatch
+      );
+    });
+
+    const jobIds = matchingJobs.map((job) =>
+      Number(job.id),
+    );
+
+    if (jobIds.length === 0) {
+      return {
+        answer:
+          `I couldn't find any current jobs that match your ${userEducation} education and ${userYears} years of experience based on the job requirements.`,
+        jobIds: [],
+      };
+    }
+
+    /**
+     * Ask Gemini only to create a natural-language
+     * explanation. It does NOT decide which jobs match.
+     */
+    const matchedJobContext =
+      matchingJobs
+        .map((job) =>
+          [
+            `Job ID: ${job.id}`,
+            `Title: ${job.title}`,
+            `Educational Qualification: ${job.educationalQualification}`,
+            `Experience: ${job.experience}`,
+          ].join("\n"),
+        )
+        .join("\n\n---\n\n");
+
+    const explanationPrompt = `
+You are a professional recruitment assistant.
+
+The backend has ALREADY determined which jobs match the user's profile.
+
+Do NOT add or remove jobs.
+Do NOT make another matching decision.
+Do NOT invent requirements.
+
+User profile:
+Education: ${userEducation}
+Experience: ${userYears} years
+
+Matched jobs from the database:
+
+${matchedJobContext}
+
+Write a short professional Telegram response explaining that these jobs match the user's education and experience.
+
+Mention the job titles only.
+
+Return ONLY valid JSON:
+
+{
+  "answer": "short explanation",
+  "jobIds": [${jobIds.join(", ")}]
+}
+`.trim();
+
+    try {
+      let rawAnswer: string;
+
+      try {
+        rawAnswer =
+          await generateWithRetry(
+            PRIMARY_MODEL,
+            explanationPrompt,
+          );
+      } catch (primaryError) {
+        console.warn(
+          "[Telegram AI] Primary model failed. Trying fallback.",
+          primaryError,
+        );
+
+        rawAnswer =
+          await generateWithRetry(
+            FALLBACK_MODEL,
+            explanationPrompt,
+          );
+      }
+
+      try {
+        const parsed =
+          JSON.parse(rawAnswer) as TelegramAIResult;
+
+        return {
+          answer:
+            typeof parsed.answer ===
+              "string" &&
+            parsed.answer.trim()
+              ? parsed.answer.trim()
+              : `I found ${jobIds.length} matching job(s) based on your education and experience.`,
+          jobIds,
+        };
+      } catch {
+        return {
+          answer:
+            `I found ${jobIds.length} matching job(s) based on your education and experience.`,
+          jobIds,
+        };
+      }
+    } catch (error) {
+      console.error(
+        "[Telegram AI] Explanation generation failed:",
+        error,
+      );
+
+      return {
+        answer:
+          `I found ${jobIds.length} matching job(s) based on your education and experience.`,
+        jobIds,
+      };
+    }
+  }
+
+  /**
+   * If the user didn't provide enough structured information
+   * for deterministic matching, use Gemini to answer normally.
+   */
   const jobContext = jobs
-    .map((job) => {
-      return [
+    .map((job) =>
+      [
         `Job ID: ${job.id}`,
         `Title: ${job.title}`,
         `Employer: ${job.employer}`,
@@ -104,71 +597,29 @@ export async function askTelegramAI(
         `Opening Date: ${job.openingDate}`,
         `Closing Date: ${job.closingDate}`,
         `Description: ${job.description}`,
-      ].join("\n");
-    })
+      ].join("\n"),
+    )
     .join("\n\n---\n\n");
 
   const prompt = `
 You are the AI Job Assistant for a professional recruitment Job Portal Telegram bot.
 
-Your task is to understand the user's request and recommend ONLY relevant jobs from the CURRENT ACTIVE JOBS data.
+Use ONLY the current active jobs below.
 
-STRICT RULES:
+Never invent jobs or job information.
 
-1. Use ONLY the provided active-job data for job-specific information.
-2. NEVER invent a job, employer, salary, requirement, location, experience, education, or deadline.
-3. If the user asks which jobs match their education and experience, compare their profile against the job's:
-   - Educational Qualification
-   - Experience
-   - Department
-   - Job Title
-   - Description
-   - Requirements
-4. Recommend a job ONLY when there is a clear and reasonable match.
-5. Do NOT recommend jobs simply because the user's education could technically be accepted.
-6. Relevant work experience is important. Prefer jobs where the user's experience level is appropriate.
-7. If the user's degree is Accounting and the job is unrelated to accounting, do NOT recommend it unless the job requirements clearly make it relevant.
-8. Do NOT recommend a Store Keeper, Receptionist, Sales Representative, Marketing Officer, HR Officer, etc. just because the user's degree may technically satisfy a generic education requirement.
-9. When the user asks for jobs matching their profile, return ONLY the matching job IDs in jobIds.
-10. Do NOT list all active jobs in the answer.
-11. Do NOT repeat the complete active-job list in the answer.
-12. If only one job clearly matches, recommend only that job.
-13. If no job clearly matches, return an empty jobIds array and explain that no current active job clearly matches.
-14. Do not make hiring decisions.
-15. Do not claim that the user is guaranteed to get a job.
-16. Keep the answer concise and professional for Telegram.
-17. When recommending jobs, briefly explain WHY each recommended job matches.
-18. The bot will display the full job details separately, so do NOT repeat salary, location, employer, education, or closing date in the answer unless necessary.
-19. Return ONLY valid JSON.
-20. The JSON must have exactly these fields:
-   - answer: string
-   - jobIds: number[]
-21. If the user asks "which jobs match me", "what jobs fit me", "which jobs can I apply for", or provides their degree and experience, treat the request as a JOB MATCHING request, NOT as a request to list all active jobs.
+If the user asks for general job information, answer using the provided database data.
 
-IMPORTANT MATCHING LOGIC:
+If the user asks for job matching but does not provide enough information for deterministic matching, ask the user to provide:
+- educational qualification
+- years of experience
 
-For a user with:
-- Bachelor's degree in Accounting
-- 2 years of experience
+Return ONLY valid JSON:
 
-A job such as:
-- Accountant
-- Senior Accountant
-- Accounting Officer
-- Finance-related position
-
-may be relevant if its requirements match the user's education and experience.
-
-A job such as:
-- Store Keeper
-- Receptionist
-- Sales Representative
-- Marketing Officer
-- HR Officer
-- Frontend Developer
-- Backend Developer
-
-should NOT be recommended merely because the user's degree could technically satisfy a generic educational requirement.
+{
+  "answer": "string",
+  "jobIds": []
+}
 
 CURRENT ACTIVE JOBS:
 
@@ -183,58 +634,56 @@ ${question}
     let rawAnswer: string;
 
     try {
-      console.log(
-        `[Telegram AI] Trying primary model: ${PRIMARY_MODEL}`,
-      );
-
-      rawAnswer = await generateWithRetry(
-        PRIMARY_MODEL,
-        prompt,
-      );
+      rawAnswer =
+        await generateWithRetry(
+          PRIMARY_MODEL,
+          prompt,
+        );
     } catch (primaryError) {
-      const primaryStatus = getStatus(primaryError);
-
       console.warn(
-        `[Telegram AI] Primary model failed ` +
-          `(status: ${primaryStatus ?? "unknown"}). ` +
-          `Trying fallback model: ${FALLBACK_MODEL}`,
+        "[Telegram AI] Primary model failed. Trying fallback.",
+        primaryError,
       );
 
-      rawAnswer = await generateWithRetry(
-        FALLBACK_MODEL,
-        prompt,
-      );
+      rawAnswer =
+        await generateWithRetry(
+          FALLBACK_MODEL,
+          prompt,
+        );
     }
 
     try {
-      const parsed = JSON.parse(
-        rawAnswer,
-      ) as TelegramAIResult;
+      const parsed =
+        JSON.parse(rawAnswer) as TelegramAIResult;
 
       const validJobIds = new Set(
         jobs.map((job) => Number(job.id)),
       );
 
-      const jobIds = Array.isArray(parsed.jobIds)
-        ? parsed.jobIds
-            .map(Number)
-            .filter((id) => validJobIds.has(id))
+      const jobIds = Array.isArray(
+        parsed.jobIds,
+      )
+        ? [
+            ...new Set(
+              parsed.jobIds
+                .map(Number)
+                .filter((id) =>
+                  validJobIds.has(id),
+                ),
+            ),
+          ]
         : [];
 
       return {
         answer:
-          typeof parsed.answer === "string" &&
+          typeof parsed.answer ===
+            "string" &&
           parsed.answer.trim()
             ? parsed.answer.trim()
             : "I could not find a suitable answer.",
         jobIds,
       };
-    } catch (error) {
-      console.error(
-        "[Telegram AI] Failed to parse Gemini response:",
-        error,
-      );
-
+    } catch {
       return {
         answer: rawAnswer,
         jobIds: [],
