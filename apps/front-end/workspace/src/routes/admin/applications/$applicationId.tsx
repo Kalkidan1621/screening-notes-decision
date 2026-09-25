@@ -788,18 +788,6 @@ const handleInterviewAction = async (
 
           <div className="candidate-header-actions">
 
-            {application.resumeUrl && (
-              <a
-                href={application.resumeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary"
-              >
-                <span>↗</span>
-                View CV
-              </a>
-            )}
-
             <a
               href={`mailto:${application.email}`}
               className="btn btn-primary"
@@ -2704,6 +2692,75 @@ function ResumePreviewCard({
 }: {
   application: Application;
 }) {
+  const [cvUrl, setCvUrl] = useState<string | null>(
+    null,
+  );
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let cancelled = false;
+
+    async function loadCv() {
+      if (!application.resumeUrl) {
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const url =
+          await getApplicationCvUrl(
+            application.id,
+          );
+
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+
+        objectUrl = url;
+        setCvUrl(url);
+      } catch (error) {
+        console.error(
+          "Failed to load CV preview:",
+          error,
+        );
+
+        if (!cancelled) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load CV preview.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadCv();
+
+    return () => {
+      cancelled = true;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [
+    application.id,
+    application.resumeUrl,
+  ]);
+
   if (!application.resumeUrl) {
     return null;
   }
@@ -2718,10 +2775,29 @@ function ResumePreviewCard({
 
       <div className="resume-preview">
 
-        <iframe
-          src={application.resumeUrl}
-          title="Candidate Resume"
-        />
+        {loading && (
+          <div className="resume-preview-message">
+            Loading CV...
+          </div>
+        )}
+
+        {error && (
+          <div className="resume-preview-message">
+            {error}
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          cvUrl && (
+            <iframe
+              src={cvUrl}
+              title={
+                application.resumeName ||
+                "Candidate Resume"
+              }
+            />
+          )}
 
       </div>
 
