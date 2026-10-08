@@ -1,182 +1,332 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { getJobs } from "@/services/jobs.service";
-import type { Job } from "@/types/jobs";
-
-import "@/styles/jobs.css";
+import "@/styles/home.css";
 
 export const Route = createFileRoute("/")({
-  component: JobListPage,
+  component: HomePage,
 });
 
-function JobListPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [search, setSearch] = useState("");
-
-  const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchJobs() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await getJobs();
-
-        console.log("Jobs received from backend:", response.data);
-
-        setJobs(response.data);
-      } catch (error) {
-        console.error("Failed to load jobs:", error);
-
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load available jobs.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchJobs();
-  }, []);
-
-  const filteredJobs = useMemo(() => {
-    const searchValue = search.trim().toLowerCase().replace(/\s+/g, " ");
-
-    if (!searchValue) {
-      return jobs;
-    }
-
-    return jobs.filter((job) => {
-       return (
-      job.title.toLowerCase().includes(searchValue) ||
-      job.department.toLowerCase().includes(searchValue) ||
-      job.location.toLowerCase().includes(searchValue)
-    );
-    });
-  }, [jobs, search]);
-
-  function formatEmploymentType(type: Job["employmentType"]) {
-    return type
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
-
-  function handleApply(job: Job) {
-  navigate({
-    to: "/jobs/$jobId",
-    params: {
-      jobId: String(job.id),
-    },
-  });
-}
-
-  if (loading) {
-    return (
-      <main className="jobs-page">
-        <div className="jobs-loading">
-          <div className="jobs-spinner" />
-          <p>Loading available jobs...</p>
-        </div>
-      </main>
-    );
-  }
-
+function HomePage() {
   return (
-    <main className="jobs-page">
-      <section className="jobs-hero">
-        <p className="jobs-eyebrow">CAREER OPPORTUNITIES</p>
+    <main className="home-page">
+      {/* Hero */}
+      <section className="home-hero">
+        <div className="home-hero-container">
+          <div className="home-hero-content">
+            <span className="home-eyebrow">
+              MUYALOGY RECRUITMENT
+            </span>
 
-        <h1>Current Openings</h1>
+            <h1>
+              Find the Right
+              <span> Opportunity.</span>
+              <br />
+              Build Your Future.
+            </h1>
 
-        <p className="jobs-subtitle">
-          Explore open opportunities and find the role that matches your
-          skills and career goals.
-        </p>
+            <p>
+              Discover meaningful career opportunities,
+              connect with trusted employers, and take
+              the next step toward your professional future.
+            </p>
 
-        <div className="jobs-search">
-          <span aria-hidden="true">⌕</span>
+            <div className="home-hero-actions">
+              <Link
+                to="/jobs"
+                className="home-primary-button"
+              >
+                Browse Jobs
+                <span>→</span>
+              </Link>
 
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by job title, department, or location"
-            aria-label="Search available jobs"
-          />
-        </div>
-      </section>
+              <Link
+                to="/about"
+                className="home-secondary-button"
+              >
+                Learn More
+              </Link>
+            </div>
 
-      {error && (
-        <div className="jobs-message jobs-error" role="alert">
-          <strong>Unable to load jobs.</strong>
-          <span>{error}</span>
-        </div>
-      )}
+            <div className="home-hero-trust">
+              <div className="home-trust-item">
+                <strong>Professional</strong>
+                <span>Recruitment Platform</span>
+              </div>
 
-      {!error && filteredJobs.length === 0 && (
-        <div className="jobs-message jobs-empty">
-          {jobs.length === 0
-            ? "There are no open positions at the moment."
-            : "No jobs match your search."}
-        </div>
-      )}
+              <div className="home-trust-divider" />
 
-      {!error && filteredJobs.length > 0 && (
-        <section className="jobs-list" aria-label="Available jobs">
-          {filteredJobs.map((job) => (
-            <article className="job-card" key={job.id}>
-              <div className="job-card-content">
-                <div className="job-card-header">
-                  <div>
-                    <span className="job-department">
-                      {job.department}
-                    </span>
+              <div className="home-trust-item">
+                <strong>Trusted</strong>
+                <span>Employer Connections</span>
+              </div>
+            </div>
+          </div>
 
-                    <h2>{job.title}</h2>
-                  </div>
+          <div className="home-hero-visual">
+            <div className="home-hero-image-wrapper">
+              <img
+                src="/image.webp"
+                alt="Professional recruitment"
+                className="home-hero-image"
+              />
 
-                  <span className={`job-priority ${job.priority}`}>
-                    {job.priority}
-                  </span>
+              <div className="home-hero-floating-card home-hero-card-top">
+                <div className="home-floating-icon">
+                  ✓
                 </div>
-
-                <p className="job-description">
-                  {job.description}
-                </p>
-
-                <div className="job-meta">
-                  <span>
-                    <span aria-hidden="true">⌖</span>
-                    {job.location}
-                  </span>
-
-                  <span>
-                    <span aria-hidden="true">◷</span>
-                    {formatEmploymentType(job.employmentType)}
-                  </span>
+                <div>
+                  <strong>Career Opportunities</strong>
+                  <span>Find your next opportunity</span>
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="apply-button"
-                onClick={() => handleApply(job)}
-              >
-                Apply Now
-                <span aria-hidden="true">→</span>
-              </button>
+              <div className="home-hero-floating-card home-hero-card-bottom">
+                <div className="home-floating-stat">
+                  <strong>01</strong>
+                  <span>Find</span>
+                </div>
+
+                <div className="home-floating-stat">
+                  <strong>02</strong>
+                  <span>Apply</span>
+                </div>
+
+                <div className="home-floating-stat">
+                  <strong>03</strong>
+                  <span>Grow</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us */}
+      <section className="home-section home-why-section">
+        <div className="home-section-container">
+          <div className="home-section-heading">
+            <span>WHY MUYALOGY</span>
+
+            <h2>
+              A better way to find
+              <br />
+              your next opportunity.
+            </h2>
+
+            <p>
+              We make the recruitment journey simpler,
+              clearer, and more professional for both
+              candidates and employers.
+            </p>
+          </div>
+
+          <div className="home-benefits">
+            <article className="home-benefit-card">
+              <div className="home-benefit-number">
+                01
+              </div>
+
+              <div className="home-benefit-icon">
+                ◇
+              </div>
+
+              <h3>Trusted Opportunities</h3>
+
+              <p>
+                Explore opportunities from employers
+                looking for qualified and motivated
+                professionals.
+              </p>
             </article>
-          ))}
-        </section>
-      )}
+
+            <article className="home-benefit-card">
+              <div className="home-benefit-number">
+                02
+              </div>
+
+              <div className="home-benefit-icon">
+                ✓
+              </div>
+
+              <h3>Simple Application</h3>
+
+              <p>
+                Find a suitable position and complete
+                your application through a clear and
+                straightforward process.
+              </p>
+            </article>
+
+            <article className="home-benefit-card">
+              <div className="home-benefit-number">
+                03
+              </div>
+
+              <div className="home-benefit-icon">
+                ↗
+              </div>
+
+              <h3>Career Growth</h3>
+
+              <p>
+                Move forward with opportunities that
+                match your skills, experience, and
+                professional goals.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="home-section home-process-section">
+        <div className="home-section-container">
+          <div className="home-process-heading">
+            <div>
+              <span>HOW IT WORKS</span>
+
+              <h2>
+                Your journey starts here.
+              </h2>
+            </div>
+
+            <p>
+              From discovering an opportunity to
+              progressing through recruitment, we keep
+              the process organized and transparent.
+            </p>
+          </div>
+
+          <div className="home-process">
+            <div className="home-process-step">
+              <div className="home-process-circle">
+                01
+              </div>
+
+              <div>
+                <h3>Explore</h3>
+                <p>
+                  Browse available job opportunities
+                  and find positions that match your
+                  career goals.
+                </p>
+              </div>
+            </div>
+
+            <div className="home-process-line" />
+
+            <div className="home-process-step">
+              <div className="home-process-circle">
+                02
+              </div>
+
+              <div>
+                <h3>Apply</h3>
+                <p>
+                  Submit your application and provide
+                  the information needed for the
+                  recruitment process.
+                </p>
+              </div>
+            </div>
+
+            <div className="home-process-line" />
+
+            <div className="home-process-step">
+              <div className="home-process-circle">
+                03
+              </div>
+
+              <div>
+                <h3>Progress</h3>
+                <p>
+                  Track your application as it moves
+                  through the recruitment process.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Candidate / Employer */}
+      <section className="home-section home-audience-section">
+        <div className="home-section-container">
+          <div className="home-audience-grid">
+            <article className="home-audience-card home-audience-candidate">
+              <span>FOR CANDIDATES</span>
+
+              <h2>
+                Take the next step
+                in your career.
+              </h2>
+
+              <p>
+                Discover opportunities, apply for
+                positions, and keep track of your
+                recruitment journey from one place.
+              </p>
+
+              <Link
+                to="/jobs"
+                className="home-audience-link"
+              >
+                Explore Opportunities
+                <span>→</span>
+              </Link>
+            </article>
+
+            <article className="home-audience-card home-audience-employer">
+              <span>FOR EMPLOYERS</span>
+
+              <h2>
+                Find people who
+                move your business forward.
+              </h2>
+
+              <p>
+                Connect with qualified candidates and
+                manage your recruitment process through
+                a structured platform.
+              </p>
+
+              <Link
+                to="/about"
+                className="home-audience-link"
+              >
+                Learn About Muyalogy
+                <span>→</span>
+              </Link>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="home-cta-section">
+        <div className="home-cta-container">
+          <div>
+            <span>YOUR NEXT STEP</span>
+
+            <h2>
+              Ready for your next opportunity?
+            </h2>
+
+            <p>
+              Explore available positions and start
+              your journey today.
+            </p>
+          </div>
+
+          <Link
+            to="/jobs"
+            className="home-cta-button"
+          >
+            Explore Jobs
+            <span>→</span>
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

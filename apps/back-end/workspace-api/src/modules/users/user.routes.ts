@@ -92,15 +92,6 @@ userRoutes.get(
   },
 );
 
-/**
- * GET /users/interviewers
- *
- * Returns only active users who can conduct interviews.
- *
- * Allowed roles:
- * - RECRUITER
- * - HIRING_MANAGER
- */
 userRoutes.get(
   "/interviewers",
   requireAuth,
