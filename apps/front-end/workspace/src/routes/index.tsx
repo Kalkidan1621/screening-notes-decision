@@ -65,7 +65,7 @@ function HomePage() {
           <div className="home-hero-visual">
             <div className="home-hero-image-wrapper">
               <img
-                src="/image.webp"
+                src="/images/home-hero-office.png"
                 alt="Professional recruitment"
                 className="home-hero-image"
               />
