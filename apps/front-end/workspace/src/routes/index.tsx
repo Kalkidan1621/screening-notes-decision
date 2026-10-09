@@ -69,33 +69,6 @@ function HomePage() {
                 alt="Professional recruitment"
                 className="home-hero-image"
               />
-
-              <div className="home-hero-floating-card home-hero-card-top">
-                <div className="home-floating-icon">
-                  ✓
-                </div>
-                <div>
-                  <strong>Career Opportunities</strong>
-                  <span>Find your next opportunity</span>
-                </div>
-              </div>
-
-              <div className="home-hero-floating-card home-hero-card-bottom">
-                <div className="home-floating-stat">
-                  <strong>01</strong>
-                  <span>Find</span>
-                </div>
-
-                <div className="home-floating-stat">
-                  <strong>02</strong>
-                  <span>Apply</span>
-                </div>
-
-                <div className="home-floating-stat">
-                  <strong>03</strong>
-                  <span>Grow</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

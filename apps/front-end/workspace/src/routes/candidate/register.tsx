@@ -313,13 +313,13 @@ function CandidateRegisterPage() {
 
         <div className="login-footer">
            <Link
-  to="/candidate/login"
-  search={{
-    redirect,
-  }}
->
-  Already have an account?
-</Link>
+             to="/candidate/login"
+             search={{
+             redirect,
+         }}
+        >
+            Already have an account?
+          </Link>
         </div>
 
       </section>

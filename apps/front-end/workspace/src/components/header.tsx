@@ -1,3 +1,4 @@
+
 import { Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
@@ -28,7 +29,7 @@ function Icon({ name }: { name: IconName }) {
     strokeWidth: 1.8,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
-    "aria-hidden": true,
+    "aria-hidden": true as const,
   };
 
   switch (name) {
@@ -97,9 +98,7 @@ function Icon({ name }: { name: IconName }) {
 }
 
 function formatRole(role?: string) {
-  if (!role) {
-    return "";
-  }
+  if (!role) return "";
 
   return role
     .toLowerCase()
@@ -114,16 +113,13 @@ function formatRole(role?: string) {
 export default function Header() {
   const router = useRouter();
 
-  const [user, setUser] =
-    useState<AuthUser | null>(null);
-
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  const userMenuRef =
-    useRef<HTMLDivElement | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -132,21 +128,19 @@ export default function Header() {
       try {
         const response = await getCurrentUser();
 
-        if (mounted && response.success) {
-          setUser(response.data ?? null);
+        if (mounted) {
+          setUser(
+            response.success ? response.data ?? null : null,
+          );
         }
       } catch {
-        if (mounted) {
-          setUser(null);
-        }
+        if (mounted) setUser(null);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     }
 
-    loadUser();
+    void loadUser();
 
     return () => {
       mounted = false;
@@ -157,9 +151,7 @@ export default function Header() {
     function handleOutsideClick(event: MouseEvent) {
       if (
         userMenuRef.current &&
-        !userMenuRef.current.contains(
-          event.target as Node,
-        )
+        !userMenuRef.current.contains(event.target as Node)
       ) {
         setMenuOpen(false);
       }
@@ -172,48 +164,41 @@ export default function Header() {
       }
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleOutsideClick,
-    );
-
-    document.addEventListener(
-      "keydown",
-      handleEscape,
-    );
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
 
     return () => {
       document.removeEventListener(
         "mousedown",
         handleOutsideClick,
       );
-
-      document.removeEventListener(
-        "keydown",
-        handleEscape,
-      );
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
   async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
     try {
       await logout();
-    } finally {
       setUser(null);
       setMenuOpen(false);
       setMobileMenuOpen(false);
 
-      await router.navigate({
-        to: "/login",
-      });
+      await router.navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Unable to sign out:", error);
+    } finally {
+      setLoggingOut(false);
     }
   }
 
   const role = user?.role?.toUpperCase();
 
   const isCandidate = role === "CANDIDATE";
-  const isAdmin =
-    role === "ADMIN" || role === "SUPER_ADMIN";
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
 
   const displayName =
     [user?.firstName, user?.lastName]
@@ -226,17 +211,19 @@ export default function Header() {
     `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`
       .toUpperCase() || "U";
 
+  function closeMenus() {
+    setMenuOpen(false);
+    setMobileMenuOpen(false);
+  }
+
   return (
     <header className="site-header">
       <div className="site-navigation">
         <Link
           to="/"
           className="site-logo"
-          onClick={() => {
-            setMenuOpen(false);
-            setMobileMenuOpen(false);
-          }}
           aria-label="Muyalogy Recruitment home"
+          onClick={closeMenus}
         >
           <img
             src="/image.webp"
@@ -248,11 +235,12 @@ export default function Header() {
         <button
           type="button"
           className="mobile-menu-button"
-          aria-label="Toggle navigation"
-          aria-expanded={mobileMenuOpen}
-          onClick={() =>
-            setMobileMenuOpen((open) => !open)
+          aria-label={
+            mobileMenuOpen ? "Close navigation" : "Open navigation"
           }
+          aria-expanded={mobileMenuOpen}
+          aria-controls="site-main-navigation"
+          onClick={() => setMobileMenuOpen((open) => !open)}
         >
           <span />
           <span />
@@ -260,10 +248,9 @@ export default function Header() {
         </button>
 
         <nav
+          id="site-main-navigation"
           className={`site-main-nav ${
-            mobileMenuOpen
-              ? "site-main-nav-open"
-              : ""
+            mobileMenuOpen ? "site-main-nav-open" : ""
           }`}
           aria-label="Primary navigation"
         >
@@ -274,7 +261,7 @@ export default function Header() {
               className: "site-nav-link site-nav-link-active",
             }}
             className="site-nav-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMenus}
           >
             Home
           </Link>
@@ -285,7 +272,7 @@ export default function Header() {
               className: "site-nav-link site-nav-link-active",
             }}
             className="site-nav-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMenus}
           >
             Jobs
           </Link>
@@ -296,7 +283,7 @@ export default function Header() {
               className: "site-nav-link site-nav-link-active",
             }}
             className="site-nav-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMenus}
           >
             About
           </Link>
@@ -304,34 +291,40 @@ export default function Header() {
 
         <div className="site-header-actions">
           {!loading && !user && (
-            <Link
-              to="/login"
-              className="site-sign-in-button"
-              onClick={() =>
-                setMobileMenuOpen(false)
-              }
-            >
-              Sign In
-            </Link>
+            <div className="site-auth-actions">
+              <Link
+                to="/login"
+                className="site-sign-in-button"
+                onClick={closeMenus}
+              >
+                Sign In
+              </Link>
+
+              <Link
+                to="/candidate/register"
+                search={{ redirect: "/jobs" }}
+                className="site-sign-up-button"
+                onClick={closeMenus}
+              >
+                Sign Up
+              </Link>
+            </div>
           )}
 
           {user && (
-            <div
-              className="site-user-menu"
-              ref={userMenuRef}
-            >
+            <div className="site-user-menu" ref={userMenuRef}>
               <button
                 type="button"
                 className="site-user-button"
+                aria-label={`Account menu for ${displayName}`}
                 aria-expanded={menuOpen}
-                onClick={() =>
-                  setMenuOpen((open) => !open)
-                }
+                aria-haspopup="true"
+                onClick={() => setMenuOpen((open) => !open)}
               >
                 {user.profileImageUrl ? (
                   <img
                     src={user.profileImageUrl}
-                    alt={displayName}
+                    alt=""
                     className="site-user-avatar"
                   />
                 ) : (
@@ -347,10 +340,9 @@ export default function Header() {
 
                 <span
                   className={`site-user-chevron ${
-                    menuOpen
-                      ? "site-user-chevron-open"
-                      : ""
+                    menuOpen ? "site-user-chevron-open" : ""
                   }`}
+                  aria-hidden="true"
                 >
                   <svg
                     width="16"
@@ -361,7 +353,6 @@ export default function Header() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    aria-hidden="true"
                   >
                     <path d="m6 9 6 6 6-6" />
                   </svg>
@@ -374,7 +365,7 @@ export default function Header() {
                     {user.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
-                        alt={displayName}
+                        alt=""
                         className="site-dropdown-avatar"
                       />
                     ) : (
@@ -397,96 +388,72 @@ export default function Header() {
                       <Link
                         to="/admin"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="dashboard" />
                         <span>
                           <strong>Dashboard</strong>
-                          <small>
-                            Recruitment overview
-                          </small>
+                          <small>Recruitment overview</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/admin/applications"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="applications" />
                         <span>
                           <strong>Applications</strong>
-                          <small>
-                            Review applications
-                          </small>
+                          <small>Review applications</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/admin/profile"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="profile" />
                         <span>
                           <strong>Profile</strong>
-                          <small>
-                            Manage your profile
-                          </small>
+                          <small>Manage your profile</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/admin/jobs"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="jobs" />
                         <span>
                           <strong>Jobs</strong>
-                          <small>
-                            Manage job listings
-                          </small>
+                          <small>Manage job listings</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/admin/users"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="management" />
                         <span>
                           <strong>Management</strong>
-                          <small>
-                            Manage system users
-                          </small>
+                          <small>Manage system users</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/admin/account"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="account" />
                         <span>
                           <strong>Account</strong>
-                          <small>
-                            Account settings
-                          </small>
+                          <small>Account settings</small>
                         </span>
                       </Link>
                     </>
@@ -497,48 +464,36 @@ export default function Header() {
                       <Link
                         to="/candidate/profile"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="profile" />
                         <span>
                           <strong>My Profile</strong>
-                          <small>
-                            Manage your profile
-                          </small>
+                          <small>Manage your profile</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/jobs"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="jobs" />
                         <span>
                           <strong>Jobs</strong>
-                          <small>
-                            Browse opportunities
-                          </small>
+                          <small>Browse opportunities</small>
                         </span>
                       </Link>
 
                       <Link
                         to="/candidate/applications"
                         className="site-dropdown-link"
-                        onClick={() =>
-                          setMenuOpen(false)
-                        }
+                        onClick={closeMenus}
                       >
                         <Icon name="applications" />
                         <span>
                           <strong>My Applications</strong>
-                          <small>
-                            Track your applications
-                          </small>
+                          <small>Track your applications</small>
                         </span>
                       </Link>
                     </>
@@ -549,13 +504,18 @@ export default function Header() {
                   <button
                     type="button"
                     className="site-dropdown-link site-dropdown-logout"
+                    disabled={loggingOut}
                     onClick={handleLogout}
                   >
                     <Icon name="logout" />
                     <span>
-                      <strong>Sign Out</strong>
+                      <strong>
+                        {loggingOut ? "Signing Out..." : "Sign Out"}
+                      </strong>
                       <small>
-                        Sign out of your account
+                        {loggingOut
+                          ? "Please wait"
+                          : "Sign out of your account"}
                       </small>
                     </span>
                   </button>
