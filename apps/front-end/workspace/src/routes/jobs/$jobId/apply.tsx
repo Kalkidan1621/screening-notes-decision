@@ -73,7 +73,7 @@ function ApplyPage() {
 
         if (!user) {
           await navigate({
-            to: "/candidate/register",
+            to: "/candidate/login",
             search: {
               redirect: `/jobs/${jobId}/apply`,
             },
@@ -104,7 +104,7 @@ function ApplyPage() {
         );
 
         await navigate({
-          to: "/candidate/register",
+          to: "/candidate/login",
           search: {
             redirect: `/jobs/${jobId}/apply`,
           },

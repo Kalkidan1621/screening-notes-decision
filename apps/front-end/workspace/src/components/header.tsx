@@ -297,16 +297,7 @@ export default function Header() {
                 className="site-sign-in-button"
                 onClick={closeMenus}
               >
-                Sign In
-              </Link>
-
-              <Link
-                to="/candidate/register"
-                search={{ redirect: "/jobs" }}
-                className="site-sign-up-button"
-                onClick={closeMenus}
-              >
-                Sign Up
+                Login
               </Link>
             </div>
           )}

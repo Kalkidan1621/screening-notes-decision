@@ -81,7 +81,9 @@ if (role === "SUPER_ADMIN") {
   await navigate({
     to: "/admin/screening",
   });
-} else {
+} else if (role === "CANDIDATE") {
+  await navigate({ to: "/" });
+}else {
   setError(
     "Your account does not have a valid role.",
   );
