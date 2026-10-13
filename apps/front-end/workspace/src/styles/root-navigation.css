@@ -9,70 +9,67 @@
   z-index: 1000;
   width: 100%;
   background: #ffffff;
-  border-bottom: 1px solid #e8edf3;
-  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+  border-bottom: 1px solid #f1f5f9; /* ይበልጥ ለስላሳ መስመር */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .site-navigation {
-  width: min(1200px, calc(100% - 48px));
-  min-height: 76px;
+  width: min(1280px, calc(100% - 48px)); /* ሰፋ ያለ የኢንተርፕራይዝ እይታ */
+  min-height: 80px; /* ፍፁም የሆነ የከፍታ መጠን */
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 32px;
 }
 
 .site-logo {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  flex: 0 0 220px;
-  width: 220px;
-  min-width: 0;
-  overflow: visible;
+  flex: 0 0 auto;
   text-decoration: none;
 }
 
 .site-logo-image {
   display: block;
-  flex: 0 0 220px;
-  width: 220px;
-  min-width: 220px;
-  max-width: none;
-  height: 56px;
+  height: 40px; 
+  width: auto;
   object-fit: contain;
-  object-position: left center;
-  visibility: visible;
-  opacity: 1;
+  transition: transform 0.2s ease;
 }
+.site-logo:hover .site-logo-image {
+  transform: scale(1.02);
+}
+
 .site-main-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 36px; /* በሊንኮቹ መሃል በቂ ክፍተት */
   margin: 0 auto;
 }
-
 .site-nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 76px;
-  color: #475467;
+  min-height: 80px;
+  color: #475569; /* ይበልጥ ዘመናዊ Slate Gray ቀለም */
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.site-nav-link:hover,
+.site-nav-link:hover {
+  color: #0091FF; /
+}
 .site-nav-link-active {
-  color: #0788bb;
+  color: #0091FF !important;
+  font-weight: 600;
 }
-
 .site-nav-link-active::after {
   position: absolute;
   right: 0;
@@ -80,9 +77,10 @@
   left: 0;
   height: 3px;
   content: "";
-  background: #12a8df;
+  background: #0091FF;
   border-radius: 3px 3px 0 0;
 }
+
 
 /* Right side actions */
 
@@ -91,66 +89,59 @@
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
-  margin-left: auto;
 }
 
 .site-auth-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+}.site-sign-in-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 10px 18px;
+  transition: color 0.2s ease;
 }
 
-.site-sign-in-button,
+.site-sign-in-button:hover {
+  color: #0091FF;
+}
+
+/* Sign Up ቁልፍ (ደማቅ ሰማያዊ) */
 .site-sign-up-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 92px;
-  min-height: 40px;
-  padding: 0 17px;
-  border: 1px solid #12a8df;
+  padding: 10px 22px;
+  border: none;
   border-radius: 8px;
+  background: #0091FF; /* የ Muyalogy ብራንድ ሰማያዊ ቀለም */
+  color: #ffffff;
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.site-sign-in-button {
-  color: #0788bb;
-  background: #ffffff;
-}
-
-.site-sign-in-button:hover {
-  color: #06749f;
-  background: #f0faff;
-  border-color: #0788bb;
-}
-
-.site-sign-up-button {
-  color: #ffffff;
-  background: #12a8df;
-  border-color: #12a8df;
+  box-shadow: 0 1px 2px 0 rgba(0, 145, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
 .site-sign-up-button:hover {
-  color: #ffffff;
-  background: #0788bb;
-  border-color: #0788bb;
-  box-shadow: 0 4px 12px rgba(18, 168, 223, 0.18);
+  background: #0077dd;
+  box-shadow: 0 4px 12px rgba(0, 145, 255, 0.15);
 }
 
 .site-sign-in-button:active,
 .site-sign-up-button:active {
-  transform: translateY(1px);
+  transform: scale(0.98); /* ሲነካ የመለስለስ ስሜት እንዲሰጥ */
 }
 
 /* User account menu */
@@ -163,24 +154,22 @@
 .site-user-button {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 5px 9px 5px 5px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: #172b4d;
-  background: transparent;
+  gap: 12px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid #f1f5f9;
+  border-radius: 9999px; /* ሙሉ በሙሉ ክብ (Pill shape) ማራኪ ቅርፅ */
+  color: #1e293b;
+  background: #f8fafc;
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .site-user-button:hover,
 .site-user-button[aria-expanded="true"] {
-  background: #f8fafc;
-  border-color: #e8edf3;
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
-
 .site-user-avatar,
 .site-user-avatar-initials {
   display: block;
