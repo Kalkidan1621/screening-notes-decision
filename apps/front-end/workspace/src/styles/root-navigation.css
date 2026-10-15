@@ -8,68 +8,65 @@
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9; /* ይበልጥ ለስላሳ መስመር */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #e7edf4;
+  box-shadow: 0 4px 18px rgba(16, 42, 67, 0.05);
 }
 
 .site-navigation {
-  width: min(1280px, calc(100% - 48px)); /* ሰፋ ያለ የኢንተርፕራይዝ እይታ */
-  min-height: 80px; /* ፍፁም የሆነ የከፍታ መጠን */
+  width: min(1320px, calc(100% - 64px));
+  min-height: 88px;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 230px;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  gap: 28px;
 }
 
 .site-logo {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
   text-decoration: none;
 }
 
 .site-logo-image {
   display: block;
-  height: 40px; 
-  width: auto;
+  width: 250px;
+  max-width: 100%;
+  height: 66px;
   object-fit: contain;
-  transition: transform 0.2s ease;
+  object-position: left center;
 }
-.site-logo:hover .site-logo-image {
-  transform: scale(1.02);
-}
-
 .site-main-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 36px; /* በሊንኮቹ መሃል በቂ ክፍተት */
-  margin: 0 auto;
+  gap: clamp(22px, 3vw, 42px);
+  margin: 0;
 }
+
 .site-nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 80px;
-  color: #475569; /* ይበልጥ ዘመናዊ Slate Gray ቀለም */
+  min-height: 88px;
+  color: #344054;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 }
 
-.site-nav-link:hover {
-  color: #0091FF; /
-}
+.site-nav-link:hover,
 .site-nav-link-active {
-  color: #0091FF !important;
-  font-weight: 600;
+  color: #0788bb;
 }
+
 .site-nav-link-active::after {
   position: absolute;
   right: 0;
@@ -77,10 +74,9 @@
   left: 0;
   height: 3px;
   content: "";
-  background: #0091FF;
+  background: #12a8df;
   border-radius: 3px 3px 0 0;
 }
-
 
 /* Right side actions */
 
@@ -88,60 +84,64 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 0 0 auto;
+  min-width: 0;
+  margin: 0;
 }
+
 
 .site-auth-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
-}.site-sign-in-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #334155;
-  background: transparent;
-  border: 1px solid transparent;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  padding: 10px 18px;
-  transition: color 0.2s ease;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
-.site-sign-in-button:hover {
-  color: #0091FF;
-}
-
-/* Sign Up ቁልፍ (ደማቅ ሰማያዊ) */
+.site-sign-in-button,
 .site-sign-up-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 22px;
-  border: none;
+  min-width: 94px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #12a8df;
   border-radius: 8px;
-  background: #0091FF; /* የ Muyalogy ብራንድ ሰማያዊ ቀለም */
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(0, 145, 255, 0.05);
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.site-sign-in-button {
+  color: #0788bb;
+  background: #ffffff;
+}
+
+.site-sign-in-button:hover {
+  color: #ffffff;
+  background: #0788bb;
+  box-shadow: 0 4px 12px rgba(7, 136, 187, 0.16);
+}
+
+.site-sign-up-button {
+  color: #ffffff;
+  background: #12a8df;
 }
 
 .site-sign-up-button:hover {
-  background: #0077dd;
-  box-shadow: 0 4px 12px rgba(0, 145, 255, 0.15);
+  background: #0788bb;
+  border-color: #0788bb;
+  box-shadow: 0 4px 12px rgba(7, 136, 187, 0.18);
 }
 
 .site-sign-in-button:active,
 .site-sign-up-button:active {
-  transform: scale(0.98); /* ሲነካ የመለስለስ ስሜት እንዲሰጥ */
+  transform: translateY(1px);
 }
 
 /* User account menu */
@@ -154,22 +154,24 @@
 .site-user-button {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 12px 6px 6px;
-  border: 1px solid #f1f5f9;
-  border-radius: 9999px; /* ሙሉ በሙሉ ክብ (Pill shape) ማራኪ ቅርፅ */
-  color: #1e293b;
-  background: #f8fafc;
+  gap: 10px;
+  padding: 5px 9px 5px 5px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #172b4d;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .site-user-button:hover,
 .site-user-button[aria-expanded="true"] {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  background: #f8fafc;
+  border-color: #e8edf3;
 }
+
 .site-user-avatar,
 .site-user-avatar-initials {
   display: block;
@@ -662,5 +664,90 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+@media (max-width: 900px) {
+  .site-navigation {
+    width: calc(100% - 32px);
+    min-height: 72px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 12px;
+  }
+
+  .site-logo-image {
+    width: 210px;
+    height: 52px;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    order: 3;
+  }
+
+  .site-header-actions {
+    order: 2;
+  }
+
+  .site-main-nav {
+    display: none;
+    grid-column: 1 / -1;
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    margin: 0;
+    padding: 8px 0 12px;
+    border-top: 1px solid #e7edf4;
+  }
+
+  .site-main-nav.site-main-nav-open {
+    display: flex;
+  }
+
+  .site-nav-link {
+    justify-content: flex-start;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .site-nav-link-active::after {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-navigation {
+    width: calc(100% - 24px);
+    min-height: 64px;
+    gap: 7px;
+  }
+
+  .site-logo-image {
+    width: 150px;
+    height: 42px;
+  }
+
+  .site-auth-actions {
+    gap: 5px;
+  }
+
+  .site-sign-in-button,
+  .site-sign-up-button {
+    min-width: 0;
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .mobile-menu-button {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .site-user-details,
+  .site-user-chevron {
+    display: none;
   }
 }
