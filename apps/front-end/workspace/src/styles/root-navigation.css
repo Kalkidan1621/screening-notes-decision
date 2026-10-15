@@ -630,7 +630,7 @@
 
   .site-sign-in-button,
   .site-sign-up-button {
-    min-height: 32px;
+    min-height: 33px;
     padding: 0 6px;
     font-size: 10px;
   }
