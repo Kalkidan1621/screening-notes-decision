@@ -751,3 +751,303 @@
     display: none;
   }
 }
+
+/* Professional Muyalogy Header Improvements */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #e8eef5;
+  box-shadow: 0 4px 18px rgba(23, 43, 77, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.site-navigation {
+  width: min(1320px, calc(100% - 64px));
+  min-height: 88px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  align-items: center;
+  gap: 32px;
+}
+
+/* Logo on the far left */
+.site-logo {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  width: 230px;
+  min-width: 0;
+  flex: initial;
+  text-decoration: none;
+}
+
+.site-logo-image {
+  display: block;
+  width: 230px;
+  min-width: 0;
+  max-width: 100%;
+  height: 62px;
+  flex: initial;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* Navigation centered */
+.site-main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.site-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  padding: 0 2px;
+  color: #475467;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-nav-link:hover,
+.site-nav-link-active {
+  color: #079bd0;
+}
+
+.site-nav-link-active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  content: "";
+  background: #12a8df;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Sign in and Sign Up on the far right */
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  margin-left: 0;
+}
+
+.site-auth-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.site-sign-in-button,
+.site-sign-up-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  min-height: 42px;
+  padding: 0 20px;
+  border: 1px solid #12a8df;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.site-sign-in-button {
+  color: #0788bb;
+  background: #ffffff;
+}
+
+.site-sign-in-button:hover {
+  color: #ffffff;
+  background: #0788bb;
+  border-color: #0788bb;
+  box-shadow: 0 5px 14px rgba(7, 136, 187, 0.16);
+}
+
+.site-sign-up-button {
+  color: #ffffff;
+  background: #12a8df;
+  border-color: #12a8df;
+  box-shadow: 0 4px 10px rgba(18, 168, 223, 0.12);
+}
+
+.site-sign-up-button:hover {
+  background: #0788bb;
+  border-color: #0788bb;
+  box-shadow: 0 5px 14px rgba(7, 136, 187, 0.2);
+}
+
+.site-sign-in-button:active,
+.site-sign-up-button:active {
+  transform: translateY(1px);
+}
+
+/* Responsive header */
+@media (max-width: 1000px) {
+  .site-navigation {
+    width: calc(100% - 40px);
+    grid-template-columns: minmax(150px, 1fr) auto auto;
+    gap: 20px;
+  }
+
+  .site-logo {
+    width: 190px;
+  }
+
+  .site-logo-image {
+    width: 190px;
+    height: 54px;
+  }
+
+  .site-main-nav {
+    gap: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-navigation {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% - 32px);
+    min-height: 72px;
+    gap: 12px;
+  }
+
+  .site-logo {
+    order: 1;
+    width: 180px;
+    max-width: calc(100% - 150px);
+  }
+
+  .site-logo-image {
+    width: 100%;
+    height: 48px;
+  }
+
+  .site-header-actions {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .site-auth-actions {
+    gap: 7px;
+  }
+
+  .site-sign-in-button,
+  .site-sign-up-button {
+    min-width: 0;
+    min-height: 37px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    order: 3;
+  }
+
+  .site-main-nav {
+    display: none;
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    margin: 0;
+    padding: 8px 0 12px;
+    border-top: 1px solid #e8eef5;
+  }
+
+  .site-main-nav.site-main-nav-open {
+    display: flex;
+  }
+
+  .site-nav-link {
+    justify-content: flex-start;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .site-nav-link-active::after {
+    display: none;
+  }
+
+  .site-user-details,
+  .site-user-chevron {
+    display: none;
+  }
+
+  .site-user-button {
+    gap: 0;
+    padding: 3px;
+  }
+
+  .site-user-dropdown {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - 96px);
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .site-navigation {
+    width: calc(100% - 20px);
+    min-height: 66px;
+    gap: 6px;
+  }
+
+  .site-logo {
+    width: 130px;
+    max-width: calc(100% - 132px);
+  }
+
+  .site-logo-image {
+    height: 38px;
+  }
+
+  .site-auth-actions {
+    gap: 5px;
+  }
+
+  .site-sign-in-button,
+  .site-sign-up-button {
+    min-height: 33px;
+    padding: 0 8px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .mobile-menu-button {
+    flex: 0 0 33px;
+    width: 33px;
+    height: 34px;
+    padding: 4px;
+  }
+
+  .mobile-menu-button span {
+    width: 17px;
+  }
+}
