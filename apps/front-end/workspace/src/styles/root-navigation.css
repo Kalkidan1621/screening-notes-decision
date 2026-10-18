@@ -46,9 +46,14 @@
   min-width: 0;
   object-fit: contain;
   object-position: left center;
+  background: transparent;
   opacity: 1;
   visibility: visible;
-  background-color:#0788bb;
+
+  /* Recolor a white transparent logo to brand blue */
+  filter: brightness(0) saturate(100%)
+    invert(39%) sepia(89%) saturate(1412%)
+    hue-rotate(163deg) brightness(94%) contrast(97%);
 }
 
 
