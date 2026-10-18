@@ -1,6 +1,10 @@
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/+$/, "").replace(/\/api$/, "");
+
+const EMPLOYERS_URL = `${API_URL}/api/employers`;
+
 export type Employer = {
   id: number;
   name: string;
@@ -36,120 +40,97 @@ export type CreateEmployerInput = {
   isActive?: boolean;
 };
 
-export type UpdateEmployerInput =
-  Partial<CreateEmployerInput>;
+export type UpdateEmployerInput = Partial<CreateEmployerInput>;
 
-export async function getAllEmployers(): Promise<EmployersResponse> {
-  const response = await fetch(`${API_URL}/employers`, {
-    credentials: "include",
-  });
+async function readResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type") || "";
 
-  const data = await response.json();
+  if (contentType.includes("application/json")) {
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+          `Request failed with status ${response.status}.`,
+      );
+    }
+
+    return data as T;
+  }
+
+  const text = await response.text();
 
   if (!response.ok) {
     throw new Error(
-      data.message || "Failed to load employers.",
+      text || `Request failed with status ${response.status}.`,
     );
   }
 
-  return data;
+  throw new Error(
+    "The server returned a non-JSON response. Check the API endpoint.",
+  );
+}
+
+export async function getAllEmployers(): Promise<EmployersResponse> {
+  const response = await fetch(EMPLOYERS_URL, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return readResponse<EmployersResponse>(response);
 }
 
 export async function getEmployerById(
   id: number,
 ): Promise<EmployerResponse> {
-  const response = await fetch(
-    `${API_URL}/employers/${id}`,
-    {
-      credentials: "include",
-    },
-  );
+  const response = await fetch(`${EMPLOYERS_URL}/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to load employer.",
-    );
-  }
-
-  return data;
+  return readResponse<EmployerResponse>(response);
 }
 
 export async function createEmployer(
   input: CreateEmployerInput,
 ): Promise<EmployerResponse> {
-  const response = await fetch(
-    `${API_URL}/employers`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(input),
+  const response = await fetch(EMPLOYERS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to create employer.",
-    );
-  }
-
-  return data;
+  return readResponse<EmployerResponse>(response);
 }
 
 export async function updateEmployer(
   id: number,
   input: UpdateEmployerInput,
 ): Promise<EmployerResponse> {
-  const response = await fetch(
-    `${API_URL}/employers/${id}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(input),
+  const response = await fetch(`${EMPLOYERS_URL}/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to update employer.",
-    );
-  }
-
-  return data;
+  return readResponse<EmployerResponse>(response);
 }
 
 export async function deleteEmployer(
   id: number,
-): Promise<{
-  success: boolean;
-  message?: string;
-}> {
-  const response = await fetch(
-    `${API_URL}/employers/${id}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
+): Promise<{ success: boolean; message?: string }> {
+  const response = await fetch(`${EMPLOYERS_URL}/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return readResponse<{ success: boolean; message?: string }>(
+    response,
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to delete employer.",
-    );
-  }
-
-  return data;
 }
